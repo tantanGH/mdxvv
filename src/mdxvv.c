@@ -434,25 +434,7 @@ int main(int argc, char* argv[]) {
   PANEL* panel_mdx_list = screen_get_panel(scr, PANEL_MDX_LIST);
 
   // get the initial MDX list
-  m->mdx_list = mdx_list_open((const unsigned char*)mdx_dir);
-  if (m->mdx_list != NULL) {
-
-    // change current drive and directory
-    int d = m->mdx_list->path_name[0];
-    CHGDRV(d - (d >= 'a' && d <= 'z') ? 'a' : 'A');
-    CHDIR(m->mdx_list->path_name);
-
-    // refresh list and play view
-    panel_mdx_play_show_path(panel_mdx_play);
-    panel_mdx_list_refresh(panel_mdx_list);
-
-    // loading completion message
-    sprintf(mes,"Loaded %d MDX files and %d sub dirs in %s.\n", m->mdx_list->mdx_count, m->mdx_list->sub_dir_count, m->mdx_list->path_name);
-    panel_message_show(panel_message, mes);
-
-  } else {
-    panel_message_show(panel_message, "!!! MDX directory open error.");
-  }
+  update_mdx_list(scr, m, mdx_dir);
   
   // program and operator panels shortcuts
   PANEL* panel_con_ops = screen_get_panel(scr, PANEL_CON_OPS);
@@ -513,15 +495,18 @@ int main(int argc, char* argv[]) {
           if (B_SFTSNS() & 0x01) {
             
             // drive change
-            int new_drv = CURDRV();
-            do {
-              new_drv = (new_drv - 1 + 26) % 26;
-            } while (CHGDRV(new_drv) < new_drv);
-            
-            static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-            sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-
-            update_mdx_list(scr, m, new_mdx_dir);
+            int d = m->mdx_list->path_name[0];
+            int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') - 1 + 26) % 26;
+            int sns = DRVCTRL(0, 1 + new_drv);    // DRVCTRL 0:current 1:A 2:B ...
+            if ((sns & 4) || !(sns & 2)) {
+              panel_message_show(panel_message, "NOT READY");
+            } else {
+              if (CHGDRV(new_drv) > new_drv) {    // CHGDRV 0:A 1:B 2:C ...
+                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                update_mdx_list(scr, m, new_mdx_dir);
+              }
+            }
 
           }
           break;
@@ -530,15 +515,18 @@ int main(int argc, char* argv[]) {
           if (B_SFTSNS() & 0x01) {
 
             // drive change
-            int new_drv = CURDRV();
-            do {
-              new_drv = (new_drv + 1) % 26;
-            } while (CHGDRV(new_drv) < new_drv);
-          
-            static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-            sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-
-            update_mdx_list(scr, m, new_mdx_dir);
+            int d = m->mdx_list->path_name[0];
+            int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') + 1) % 26;
+            int sns = DRVCTRL(0, new_drv);      // DRVCTRL 0:current 1:A 2:B ...
+            if ((sns & 4) || !(sns & 2)) {
+              panel_message_show(panel_message, "NOT READY");
+            } else {
+              if (CHGDRV(new_drv) > new_drv) {  // CHGDRV 0:A 1:B 2:C ...                    
+                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                update_mdx_list(scr, m, new_mdx_dir);
+              }
+            }
 
           } else {
 
