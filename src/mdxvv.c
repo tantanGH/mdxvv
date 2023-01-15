@@ -357,6 +357,10 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
 // mdx list update event helper
 static MDX_LIST* update_mdx_list(SCREEN_HANDLE* scr, MODEL* m, const unsigned char* new_mdx_dir) {
 
+  static unsigned char mes[ MAX_MES_LEN ];
+  sprintf(mes, "Opening MDX directory (%s) ...", new_mdx_dir);
+  panel_message_show(screen_get_panel(scr, PANEL_MESSAGE), (const unsigned char*)mes);
+
   MDX_LIST* new_mdx_list = mdx_list_open((const unsigned char*)new_mdx_dir);
   if (new_mdx_list == NULL) {
 
@@ -383,7 +387,7 @@ static MDX_LIST* update_mdx_list(SCREEN_HANDLE* scr, MODEL* m, const unsigned ch
 
     // show message
     static unsigned char mes[ MAX_MES_LEN ];
-    sprintf(mes,"Loaded %d MDX files and %d sub dirs in %s.\n", m->mdx_list->mdx_count, m->mdx_list->sub_dir_count, m->mdx_list->path_name);
+    sprintf(mes,"Loaded %d MDX files and %d sub dirs in %s.", m->mdx_list->mdx_count, m->mdx_list->sub_dir_count, m->mdx_list->path_name);
     panel_message_show(screen_get_panel(scr, PANEL_MESSAGE), mes);
 
   }
@@ -425,24 +429,20 @@ int main(int argc, char* argv[]) {
   panel_message_show(panel_message, "MDXVV version " VERSION " by tantan");
   panel_message_show(panel_message, "Completed initialization successfully.");
 
-  static unsigned char mes[ MAX_MES_LEN ];
-  sprintf(mes, "Opening MDX directory (%s)", mdx_dir);
-  panel_message_show(panel_message,(const unsigned char*)mes);
-
   // display panel shortcuts
   PANEL* panel_mdx_play = screen_get_panel(scr, PANEL_MDX_PLAY);  
   PANEL* panel_mdx_list = screen_get_panel(scr, PANEL_MDX_LIST);
 
-  // get the initial MDX list
-  update_mdx_list(scr, m, mdx_dir);
-  
   // program and operator panels shortcuts
   PANEL* panel_con_ops = screen_get_panel(scr, PANEL_CON_OPS);
   PANEL* panel_m1_ops  = screen_get_panel(scr, PANEL_M1_OPS );
   PANEL* panel_c1_ops  = screen_get_panel(scr, PANEL_C1_OPS );
   PANEL* panel_m2_ops  = screen_get_panel(scr, PANEL_M2_OPS );
   PANEL* panel_c2_ops  = screen_get_panel(scr, PANEL_C2_OPS );
-  
+
+  // get the initial MDX list
+  update_mdx_list(scr, m, mdx_dir);
+    
   // main loop
   for (;;) {
 
@@ -497,15 +497,19 @@ int main(int argc, char* argv[]) {
             // drive change
             int d = m->mdx_list->path_name[0];
             int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') - 1 + 26) % 26;
-            int sns = DRVCTRL(0, 1 + new_drv);    // DRVCTRL 0:current 1:A 2:B ...
-            if ((sns & 4) || !(sns & 2)) {
-              panel_message_show(panel_message, "NOT READY");
-            } else {
-              if (CHGDRV(new_drv) > new_drv) {    // CHGDRV 0:A 1:B 2:C ...
-                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-                update_mdx_list(scr, m, new_mdx_dir);
+            while (new_drv >= 0) {
+              int sns = DRVCTRL(0, 1 + new_drv);    // DRVCTRL 0:current 1:A 2:B ...
+              if ((sns & 4) || !(sns & 2)) {
+                //panel_message_show(panel_message, "Drive not ready or no media");
+              } else {
+                if (CHGDRV(new_drv) > new_drv) {    // CHGDRV 0:A 1:B 2:C ...
+                  static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                  sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                  update_mdx_list(scr, m, new_mdx_dir);
+                  break;
+                }
               }
+              new_drv--;
             }
 
           }
@@ -517,15 +521,19 @@ int main(int argc, char* argv[]) {
             // drive change
             int d = m->mdx_list->path_name[0];
             int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') + 1) % 26;
-            int sns = DRVCTRL(0, new_drv);      // DRVCTRL 0:current 1:A 2:B ...
-            if ((sns & 4) || !(sns & 2)) {
-              panel_message_show(panel_message, "NOT READY");
-            } else {
-              if (CHGDRV(new_drv) > new_drv) {  // CHGDRV 0:A 1:B 2:C ...                    
-                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-                update_mdx_list(scr, m, new_mdx_dir);
+            while (new_drv <= 25) {
+              int sns = DRVCTRL(0, new_drv);      // DRVCTRL 0:current 1:A 2:B ...
+              if ((sns & 4) || !(sns & 2)) {
+                //panel_message_show(panel_message, "Drive not ready or no media");
+              } else {
+                if (CHGDRV(new_drv) > new_drv) {  // CHGDRV 0:A 1:B 2:C ...                    
+                  static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                  sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                  update_mdx_list(scr, m, new_mdx_dir);
+                  break;
+                }
               }
+              new_drv++;
             }
 
           } else {
@@ -574,6 +582,26 @@ int main(int argc, char* argv[]) {
             strcpy(mdx_full_path_name, m->mdx_list->path_name);
             strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi));
 
+            // execute external MXP.X to play the selected MDX
+            static unsigned char cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
+            sprintf(cmd, "%s -p %s", MXP_EXEC, mdx_full_path_name);   // for message
+            panel_message_show(panel_message, cmd);
+            sprintf(cmd, "%s -p %s >NUL", MXP_EXEC, mdx_full_path_name);  // for system exec
+            if (system(cmd) != 0) {
+              panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+            } else {
+              panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
+            }
+
+            // move cursor before loading MDX (takes time)
+            if (scan_code == KEY_SCAN_CODE_BS) {
+              // cursor up
+              panel_mdx_list_up(panel_mdx_list);
+            } else if (scan_code == KEY_SCAN_CODE_SPACE) {
+              // cursor down            
+              panel_mdx_list_down(panel_mdx_list);
+            }
+
             // open MDX and get voice set
             if (mdx_open(&mdx, (const unsigned char*)mdx_full_path_name) != 0) {
               panel_message_show(panel_message, "!!! MDX file open error.");
@@ -598,17 +626,6 @@ int main(int argc, char* argv[]) {
             panel_op_refresh(panel_c2_ops, 4);
             mdx_close(&mdx);
 
-            // execute external MXP.X to play the selected MDX
-            static unsigned char cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
-            sprintf(cmd, "%s -p %s", MXP_EXEC, mdx_full_path_name);   // for message
-            panel_message_show(panel_message, cmd);
-            sprintf(cmd, "%s -p %s >NUL", MXP_EXEC, mdx_full_path_name);  // for system exec
-            if (system(cmd) != 0) {
-              panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-            } else {
-              panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
-            }
-
           } else if (m->mdx_list != NULL
                      && m->mdx_list->sub_dir_count > 0
                      && m->list_view_index + m->list_index < m->mdx_list->sub_dir_count
@@ -624,14 +641,16 @@ int main(int argc, char* argv[]) {
 
             update_mdx_list(scr, m, new_mdx_dir);
 
-          }
+          } else {
 
-          if (scan_code == KEY_SCAN_CODE_BS) {
-            // cursor up
-            panel_mdx_list_up(panel_mdx_list);
-          } else if (scan_code == KEY_SCAN_CODE_SPACE) {
-            // cursor down            
-            panel_mdx_list_down(panel_mdx_list);
+            if (scan_code == KEY_SCAN_CODE_BS) {
+              // cursor up
+              panel_mdx_list_up(panel_mdx_list);
+            } else if (scan_code == KEY_SCAN_CODE_SPACE) {
+              // cursor down            
+              panel_mdx_list_down(panel_mdx_list);
+            }
+
           }
 
           break;
@@ -710,7 +729,12 @@ quit:
   // resume current drive and directory
   CHGDRV(m->original_current_drive);
   CHDIR(m->original_current_dir);
-
+ 
+  // flush key buffer
+  while (B_KEYSNS() != 0) {
+    B_KEYINP();
+  }
+ 
   rc = 0;
 
 exit:

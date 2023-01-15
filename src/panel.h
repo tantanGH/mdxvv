@@ -42,7 +42,7 @@ typedef struct {
 } PANEL;
 
 // prototype declarations for PANEL
-void panel_clear(PANEL* panel, int x, int y, int width, int height);
+void panel_clear(PANEL* panel, int x, int y, int width, int height, int color);
 void panel_clear_all(PANEL* panel);
 void panel_fill(PANEL* panel, int x, int y, int width, int height, int color);
 void panel_fill_all(PANEL* panel, int color);

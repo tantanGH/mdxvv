@@ -10,13 +10,13 @@
 #define WAIT_VBLANK       while(REG_GPIP[0] & 0x10)
 
 #define PALETTE_COLOR0    (0x0000)
-#define PALETTE_COLOR1    (0x6335)    // dark purple
-#define PALETTE_COLOR2    (0x8c7f)    // purple
-#define PALETTE_COLOR3    (0xc631)    // white
+#define PALETTE_COLOR1    (0xc631)    // plane1: white
+#define PALETTE_COLOR2    (0x8c7f)    // plane2: purple
+#define PALETTE_COLOR3    (0x6335)    // plane1+2: dark purple
 
-#define COLOR_DARK_PURPLE  (1)
+#define COLOR_WHITE        (1)
 #define COLOR_PURPLE       (2)
-#define COLOR_WHITE        (3)
+#define COLOR_DARK_PURPLE  (3)
 
 #define FONT_ADDR_8x8     ((unsigned char*)0xF3A000)
 #define FONT_BYTES_8x8    (8)

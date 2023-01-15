@@ -15,12 +15,16 @@
 #define TVRAM_PAGE1 ((volatile unsigned short*)0xE20000)
 
 // clear
-void panel_clear(PANEL* panel, int x, int y, int width, int height) {
+void panel_clear(PANEL* panel, int x, int y, int width, int height, int color) {
   if (panel != NULL) {
     struct TXFILLPTR fill = { 0, panel->x + x, panel->y + y, width, height, 0 };
-    for (int i = 0; i < 4; i++) {
-      fill.vram_page = i;
+    if (color & 0x01) {
+      fill.vram_page = 0;
       TXFILL(&fill);  
+    }
+    if (color & 0x02) {
+      fill.vram_page = 1;
+      TXFILL(&fill);        
     }
   }
 }
@@ -28,7 +32,7 @@ void panel_clear(PANEL* panel, int x, int y, int width, int height) {
 // clear all
 void panel_clear_all(PANEL* panel) {
   if (panel != NULL) {
-    panel_clear(panel, 0, 0, panel->width, panel->height);
+    panel_clear(panel, 0, 0, panel->width, panel->height, 0x03);
   }
 }
 
@@ -241,6 +245,8 @@ static void panel_con_show_diagram(PANEL* panel, int x, int y, int color, int co
     }
   }
 
+  panel_yline(panel, DIAGRAM_WIDTH - 1, y, DIAGRAM_HEIGHT, COLOR_DARK_PURPLE);   // woraround... should be removed later
+
 exit:
 
 }
@@ -254,7 +260,7 @@ void panel_con_refresh(PANEL* panel) {
   VOICE_SET* vs = m->voice_set;
 
   if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28);
+    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
     goto exit;
   }
 
@@ -293,7 +299,7 @@ void panel_con_refresh(PANEL* panel) {
       case  1: pct = (bar_x2 - bar_x1) * v->feedback   / MAX_FEEDBACK;   break;
       case  2: pct = (bar_x2 - bar_x1) * v->slot_mask  / MAX_SLOT_MASK;  break;
     }
-    panel_clear(panel, bar_x1, y_ofs1 + y_step*(i+2), bar_x2 - bar_x1 + 1 + 2, 8);
+    panel_clear(panel, bar_x1, y_ofs1 + y_step*(i+2), bar_x2 - bar_x1 + 1 + 2, 8, COLOR_DARK_PURPLE);
     panel_xline(panel, bar_x1, y_ofs1 + y_step*(i+2) +4, bar_x2 - bar_x1 + 1 + 2, COLOR_DARK_PURPLE);
     panel_fill(panel, bar_x1 + pct, y_ofs1 + y_step*(i+2), 3, 8, COLOR_DARK_PURPLE);
   }
@@ -312,7 +318,7 @@ void panel_op_refresh(PANEL* panel, int op) {
   VOICE_SET* vs = m->voice_set;
   
   if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28);
+    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
     goto exit;
   }
 
@@ -449,7 +455,7 @@ void panel_op_refresh(PANEL* panel, int op) {
       case  9: pct = (bar_x2 - bar_x1) * detune2      / MAX_DETUNE2;      break;
       case 10: pct = (bar_x2 - bar_x1) * ams_enable   / MAX_AMS_ENABLE;   break;
     }
-    panel_clear(panel, bar_x1, y_ofs1 + y_step*i, bar_x2 - bar_x1 + 1 + 2, 8);
+    panel_clear(panel, bar_x1, y_ofs1 + y_step*i, bar_x2 - bar_x1 + 1 + 2, 8, COLOR_DARK_PURPLE);
     panel_xline(panel, bar_x1, y_ofs1 + y_step*i + 4, bar_x2 - bar_x1 + 1 + 2, COLOR_DARK_PURPLE);
     panel_fill(panel, bar_x1 + pct, y_ofs1 + y_step*i + 0, 3, 8, COLOR_DARK_PURPLE);
   }
@@ -466,7 +472,7 @@ void panel_op_envelope_refresh(PANEL* panel, int op) {
   VOICE_SET* vs = m->voice_set;
 
   if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28);
+    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
     goto exit;
   }
 
@@ -532,7 +538,7 @@ void panel_op_waveform_refresh(PANEL* panel, int op) {
   VOICE_SET* vs = m->voice_set;
 
   if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28);
+    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
     goto exit;
   }
 
@@ -589,6 +595,9 @@ void panel_message_show(PANEL* panel, const unsigned char *message) {
 
   if (panel == NULL || message == NULL) return;
 
+  WAIT_VSYNC;
+  WAIT_VBLANK;
+
   MODEL* m = panel->model;
 
   if (m->message_index == m->message_view_size) {
@@ -636,17 +645,20 @@ void panel_mdx_list_refresh(PANEL* panel) {
 
   if (panel == NULL) return;
 
+  WAIT_VSYNC;
+  WAIT_VBLANK;
+
   MODEL* m = panel->model;
   MDX_LIST* mdx_list = m->mdx_list;
   int yofs = 0;
 
-  panel_clear(panel, 4, 0, 760, 16*m->list_view_size);
+  panel_clear(panel, 4, 0, 760, 16*m->list_view_size, COLOR_WHITE | COLOR_DARK_PURPLE);
 
   // list sub directories first
   for (int i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
     int si = i ;
-    panel_put_text(panel, 4, 0 + 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
-    panel_put_text16(panel, 4 + 8*16, 0 + 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si));
+    panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
+    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si));
     yofs++;
   }
 
@@ -655,14 +667,14 @@ void panel_mdx_list_refresh(PANEL* panel) {
     static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     int mi = i ;
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi));
-    panel_put_text(panel, 4, 0 + 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
-    panel_put_text16(panel, 4 + 8*16, 0 + 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi));
+    panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
+    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi));
     yofs++;
   }
 
   // cursor bar
   if (mdx_list->sub_dir_count + mdx_list->mdx_count > 0) {
-    panel_xline(panel, 4, 0 + 16 * m->list_index + 15, 760, COLOR_WHITE);
+    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
   }
 }
 
@@ -682,14 +694,14 @@ void panel_mdx_list_up(PANEL* panel) {
   if (m->list_index > 0) {
 
     // just move cursor up
-    panel_clear(panel, 4, 0 + 16 * m->list_index + 15, 760, 1);
-    panel_xline(panel, 4, 0 + 16 * (m->list_index - 1) + 15, 760, COLOR_WHITE);
+    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);    // erase cursor
     m->list_index--;
+    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
 
   } else if (m->list_view_index > 0) {
 
     // we are already at the top of the list, scrolling down
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1);
+    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);    // erase cursor
     for (int i = 16 * m->list_view_size - 1; i >= 16; i--) {
       for (int j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -747,7 +759,7 @@ void panel_mdx_list_down(PANEL* panel) {
 
     if (m->list_index + 1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
       // just move cursor down
-      panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1);   // erase cursor
+      panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
       panel_xline(panel, 4, 16 * (m->list_index + 1) + 15, 760, COLOR_WHITE);
       m->list_index++;
     }
@@ -755,7 +767,7 @@ void panel_mdx_list_down(PANEL* panel) {
   } else if (m->list_view_index +1 + m->list_view_size -1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
 
     // we are at the end of list, scrolling up
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1);   // erase cursor
+    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
     for (int i = 0; i < 16 * (m->list_view_size - 1); i++) {
       for (int j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -799,9 +811,12 @@ void panel_mdx_list_down(PANEL* panel) {
 // show mdx list path
 void panel_mdx_play_show_path(PANEL* panel) {
   if (panel != NULL) {
+
+    WAIT_VBLANK;
+
     static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, panel->model->mdx_list->path_name);
-    panel_clear(panel, 4, 10, 8*16, 7);
+    panel_clear(panel, 4, 10, 8*16, 7, COLOR_DARK_PURPLE);
     panel_put_text(panel, 4, 10, COLOR_DARK_PURPLE, FONT_BOLD, trimmed_file_name);
   }
 }
@@ -809,8 +824,11 @@ void panel_mdx_play_show_path(PANEL* panel) {
 // show mdx data title
 void panel_mdx_play_show_title(PANEL* panel) {
   if (panel != NULL) {
+
+    WAIT_VBLANK;
+
     MODEL* m = panel->model;
-    panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6);
+    panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
     if ((m->mdx_list->sub_dir_count + m->mdx_list->mdx_count) > 0) {
       int mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
       panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi));
