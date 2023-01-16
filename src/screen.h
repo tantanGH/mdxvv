@@ -4,6 +4,10 @@
 #include <iocslib.h>
 #include "panel.h"
 
+//#define GVRAM             ((volatile unsigned short*)0xC00000)
+#define TVRAM_PAGE0       ((volatile unsigned short*)0xE00000)
+#define TVRAM_PAGE1       ((volatile unsigned short*)0xE20000)
+
 #define REG_GPIP          ((volatile unsigned char*)0xE88001)     // generic I/O port (Inside X68000 p81)
 
 #define WAIT_VSYNC        while(!(REG_GPIP[0] & 0x10))
@@ -14,6 +18,7 @@
 #define PALETTE_COLOR2    (0x8c7f)    // plane2: purple
 #define PALETTE_COLOR3    (0x6335)    // plane1+2: dark purple
 
+#define COLOR_BLACK        (0)
 #define COLOR_WHITE        (1)
 #define COLOR_PURPLE       (2)
 #define COLOR_DARK_PURPLE  (3)

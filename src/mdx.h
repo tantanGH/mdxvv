@@ -24,7 +24,7 @@ typedef struct {
   unsigned short voice_offset;   
   int voice_count;
 
-  unsigned short channel_offset[16];
+//  unsigned short channel_offset[16];    // no use in MDXVV
 
 } MDX;
 
@@ -52,9 +52,9 @@ VOICE_SET* mdx_get_voice_set(MDX* mdx);
 
 // prototype declarations for MDX_LIST
 MDX_LIST* mdx_list_open(const unsigned char* dir_name);
-unsigned char* mdx_list_get_sorted_file_name(MDX_LIST* mdx_list, int mi);
-unsigned char* mdx_list_get_sorted_data_title(MDX_LIST* mdx_list, int mi);
-unsigned char* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int si);
+unsigned char* mdx_list_get_sorted_file_name(MDX_LIST* mdx_list, int mi, int order);
+unsigned char* mdx_list_get_sorted_data_title(MDX_LIST* mdx_list, int mi, int order);
+unsigned char* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int si, int order);
 void mdx_list_close(MDX_LIST* mdx_list);
 
 #endif

@@ -10,10 +10,6 @@
 
 #include "data/diagram.h"
 
-#define GVRAM       ((volatile unsigned short*)0xC00000)
-#define TVRAM_PAGE0 ((volatile unsigned short*)0xE00000)
-#define TVRAM_PAGE1 ((volatile unsigned short*)0xE20000)
-
 // clear
 void panel_clear(PANEL* panel, int x, int y, int width, int height, int color) {
   if (panel != NULL) {
@@ -107,14 +103,6 @@ void panel_yline(PANEL* panel, int x, int y, int len, int color) {
       ylp.vram_page = 1;
       TXYLINE(&ylp);
     }
-  }
-}
-
-// graphics line
-void panel_line_graphic(PANEL* panel, int x1, int y1, int x2, int y2, int color) {
-  if (panel != NULL) {
-    struct LINEPTR lp = { panel->x + x1, panel->y + y1, panel->x + x2, panel->y + y2, color, 0xffff };
-    LINE(&lp);
   }
 }
 
@@ -220,6 +208,7 @@ static void panel_con_show_diagram(PANEL* panel, int x, int y, int color, int co
 
   unsigned short* d = NULL;
   switch (connection) {
+    case 0: d = diagram_con0_data; break;
     case 1: d = diagram_con1_data; break;
     case 2: d = diagram_con2_data; break;
     case 3: d = diagram_con3_data; break;
@@ -227,7 +216,6 @@ static void panel_con_show_diagram(PANEL* panel, int x, int y, int color, int co
     case 5: d = diagram_con5_data; break;
     case 6: d = diagram_con6_data; break;
     case 7: d = diagram_con7_data; break;
-    case 8: d = diagram_con8_data; break;
     default: goto exit;
   }
 
@@ -281,8 +269,8 @@ void panel_con_refresh(PANEL* panel) {
   sprintf(feedback_str,   "%3d",    v->feedback  );
   sprintf(slot_mask_str,  "%3d",    v->slot_mask );
 
-  WAIT_VSYNC;
-  WAIT_VBLANK;
+  //WAIT_VSYNC;
+  //WAIT_VBLANK;
 
   panel_put_text(panel, x_ofs2 + 16, y_ofs1 + y_step*0, COLOR_PURPLE, FONT_REGULAR, voice_no_str  );
   panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*2, COLOR_PURPLE, FONT_REGULAR, connection_str);
@@ -465,68 +453,42 @@ void panel_op_refresh(PANEL* panel, int op) {
 
 // refresh operator envelope panel with the latest model content
 void panel_op_envelope_refresh(PANEL* panel, int op) {
+  if (panel != NULL) {  
+    MODEL* m = panel->model;
+    float* adsr = NULL;
+    switch (op) {
+      case 1: adsr = m->adsr_m1; break;
+      case 2: adsr = m->adsr_c1; break;
+      case 3: adsr = m->adsr_m2; break;
+      case 4: adsr = m->adsr_c2; break;
+    }
+    //panel_fill_graphic(panel, 20, 11, ADSR_WIDTH, 40, COLOR_BLACK);
+    panel_clear(panel, 20, 11, ADSR_WIDTH, 40, COLOR_PURPLE);
+    if (adsr != NULL) {
+      for (int i = 0; i < ADSR_WIDTH - 1; i++) {
+        int x0 = panel->x + 20 + i;
+        int y0 = panel->y + 11 + 40 * ( 1.0 - adsr[i]   );
+        int y1 = panel->y + 11 + 40 * ( 1.0 - adsr[i+1] );
+        int x0a = x0 >> 4;
+        unsigned short x0b = 0x8000 >> (x0 % 16);
+        if (y0 > y1) {
+          for (int y = y0; y > y1; y--) {
+            //GVRAM[ y * 1024 + x0 ] = COLOR_PURPLE;
+            TVRAM_PAGE1[ y * 64 + x0a ] |= x0b;
+          }
+        } else if (y0 < y1) {
+          for (int y = y0; y < y1; y++) {
+            //GVRAM[ y * 1024 + x0 ] = COLOR_PURPLE;
+            TVRAM_PAGE1[ y * 64 + x0a ] |= x0b;
+          }
+        } else {
+          //GVRAM[ y0 * 1024 + x0 ] = COLOR_PURPLE;
+          TVRAM_PAGE1[ y0 * 64 + x0a ] |= x0b;
+        }
 
-  if (panel == NULL) goto exit;
-  
-  MODEL* m = panel->model;
-  VOICE_SET* vs = m->voice_set;
-
-  if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
-    goto exit;
+      }
+    }
   }
-
-  VOICE* v = &(vs->voices[ m->voice_index ]);
-
-  unsigned char attack_rate;
-  unsigned char decay_rate1;
-  unsigned char decay_rate2;
-  unsigned char release_rate;
-  unsigned char decay_level1;
-  unsigned char total_level;
-
-  switch (op) {
-    case 1:
-      attack_rate  = v->attack_rate_m1;
-      decay_rate1  = v->decay_rate1_m1;
-      decay_rate2  = v->decay_rate2_m1;
-      release_rate = v->release_rate_m1;
-      decay_level1 = v->decay_level1_m1;
-      total_level  = v->total_level_m1;
-      break;
-
-    case 2:
-      attack_rate  = v->attack_rate_c1;
-      decay_rate1  = v->decay_rate1_c1;
-      decay_rate2  = v->decay_rate2_c1;
-      release_rate = v->release_rate_c1;
-      decay_level1 = v->decay_level1_c1;
-      total_level  = v->total_level_c1;
-      break;
-
-    case 3:
-      attack_rate  = v->attack_rate_m2;
-      decay_rate1  = v->decay_rate1_m2;
-      decay_rate2  = v->decay_rate2_m2;
-      release_rate = v->release_rate_m2;
-      decay_level1 = v->decay_level1_m2;
-      total_level  = v->total_level_m2;
-      break;
-
-    case 4:
-      attack_rate  = v->attack_rate_c2;
-      decay_rate1  = v->decay_rate1_c2;
-      decay_rate2  = v->decay_rate2_c2;
-      release_rate = v->release_rate_c2;
-      decay_level1 = v->decay_level1_c2;
-      total_level  = v->total_level_c2;
-      break;
-    
-    default:
-      goto exit;
-  }
-
-exit:
 }
 
 // refresh operator waveform panel with the latest model content
@@ -658,7 +620,7 @@ void panel_mdx_list_refresh(PANEL* panel) {
   for (int i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
     int si = i ;
     panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
-    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si));
+    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, 0));
     yofs++;
   }
 
@@ -666,9 +628,9 @@ void panel_mdx_list_refresh(PANEL* panel) {
   for (int i = 0; i < mdx_list->mdx_count && yofs < m->list_view_size; i++) {
     static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     int mi = i ;
-    trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi));
+    trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
     panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
-    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi));
+    panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     yofs++;
   }
 
@@ -727,14 +689,14 @@ void panel_mdx_list_up(PANEL* panel) {
       // sub dir
       int si = m->list_view_index;
       panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
-      panel_put_text16(panel, 4 + 8*16, 0, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si));
+      panel_put_text16(panel, 4 + 8*16, 0, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, 0));
     } else {
       // MDX
       static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
       int mi = m->list_view_index - mdx_list->sub_dir_count;
-      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi));
+      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
       panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
-      panel_put_text16(panel, 4 + 8*16, 0, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi));
+      panel_put_text16(panel, 4 + 8*16, 0, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     }
 
     // new cursor bar
@@ -793,14 +755,14 @@ void panel_mdx_list_down(PANEL* panel) {
       // sub dir
       int si = m->list_view_index + m->list_view_size -1;
       panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
-      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si));
+      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, 0));
     } else {
       // MDX
       static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
       int mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
-      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi));
+      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
       panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
-      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi));
+      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     }
 
     // new cursor bar
@@ -831,7 +793,7 @@ void panel_mdx_play_show_title(PANEL* panel) {
     panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
     if ((m->mdx_list->sub_dir_count + m->mdx_list->mdx_count) > 0) {
       int mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
-      panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi));
+      panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi, m->list_sort_order));
     }
   }
 }

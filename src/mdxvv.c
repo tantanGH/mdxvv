@@ -10,6 +10,7 @@
 #include "screen.h"
 #include "panel.h"
 #include "keyboard.h"
+#include "opm.h"
 
 // create model
 static void create_model(MODEL* model) {
@@ -20,6 +21,7 @@ static void create_model(MODEL* model) {
   model->list_index = 0;
   model->list_view_size = 7;
   model->list_view_index = 0;
+  model->list_sort_order = SORT_ORDER_NORMAL;
 
   model->message_index = 0;
   model->message_view_size = 5;
@@ -112,7 +114,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   y_step = 16;
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP1 ( M1 )" );
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP1 ( M1 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M1 ( OP1 )" );
 
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -137,7 +140,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP2 ( C1 )" );
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP2 ( C1 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C1 ( OP2 )" );
   
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -162,7 +166,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP3 ( M2 )" );
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP3 ( M2 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M2 ( OP3 )" );
   
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -187,7 +192,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 ( OP4 )" );
 
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -212,7 +218,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
   panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
   panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
 
@@ -227,7 +233,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
   panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
   panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
 
@@ -242,7 +248,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
   panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
   panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
 
@@ -257,7 +263,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
   panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
   panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
 
@@ -377,9 +383,14 @@ static MDX_LIST* update_mdx_list(SCREEN_HANDLE* scr, MODEL* m, const unsigned ch
     m->list_view_index = 0;
     
     // change current drive and directory
-    int d = m->mdx_list->path_name[0];
-    CHGDRV(d - (d >= 'a' && d <= 'z') ? 'a' : 'A');
-    CHDIR(m->mdx_list->path_name);
+    int d0 = m->mdx_list->path_name[0];
+    int d1 = d0 - ((d0 >= 'a' && d0 <= 'z') ? 'a' : 'A');      // 0:A  1:B  ...
+    if (CHGDRV(d1) <= d1) {
+      panel_message_show(screen_get_panel(scr, PANEL_MESSAGE), "!!! Change drive error.");
+    }
+    if (CHDIR(m->mdx_list->path_name) != 0) {
+      panel_message_show(screen_get_panel(scr, PANEL_MESSAGE), "!!! Change directory error.");      
+    }
 
     // refresh view
     panel_mdx_play_show_path(screen_get_panel(scr, PANEL_MDX_PLAY));
@@ -439,6 +450,10 @@ int main(int argc, char* argv[]) {
   PANEL* panel_c1_ops  = screen_get_panel(scr, PANEL_C1_OPS );
   PANEL* panel_m2_ops  = screen_get_panel(scr, PANEL_M2_OPS );
   PANEL* panel_c2_ops  = screen_get_panel(scr, PANEL_C2_OPS );
+  PANEL* panel_m1_env  = screen_get_panel(scr, PANEL_M1_ENV );
+  PANEL* panel_c1_env  = screen_get_panel(scr, PANEL_C1_ENV );
+  PANEL* panel_m2_env  = screen_get_panel(scr, PANEL_M2_ENV );
+  PANEL* panel_c2_env  = screen_get_panel(scr, PANEL_C2_ENV );
 
   // get the initial MDX list
   update_mdx_list(scr, m, mdx_dir);
@@ -457,84 +472,140 @@ int main(int argc, char* argv[]) {
           // quit mdxvv
           goto quit;
 
-        case KEY_SCAN_CODE_UP:
+        case KEY_SCAN_CODE_UP: {
           // cursor up
           panel_mdx_list_up(panel_mdx_list);
           break;
+        }
 
-        case KEY_SCAN_CODE_DOWN:
+        case KEY_SCAN_CODE_DOWN: {
           // cursor down
           panel_mdx_list_down(panel_mdx_list);
           break;
+        }
 
-        case KEY_SCAN_CODE_RIGHT:
-          // voice number increase
-          if (m->voice_set != NULL) { 
-            m->voice_index = ( m->voice_index + 1 ) % m->voice_set->voice_count;
-            panel_con_refresh(panel_con_ops);
-            panel_op_refresh(panel_m1_ops, 1);
-            panel_op_refresh(panel_c1_ops, 2);
-            panel_op_refresh(panel_m2_ops, 3);
-            panel_op_refresh(panel_c2_ops, 4);
-          }
-          break;
-
-        case KEY_SCAN_CODE_LEFT:
-          // voice number decrease
-          if (m->voice_set != NULL) {
-            m->voice_index = ( m->voice_index - 1 + m->voice_set->voice_count ) % m->voice_set->voice_count;
-            panel_con_refresh(panel_con_ops);
-            panel_op_refresh(panel_m1_ops, 1);
-            panel_op_refresh(panel_c1_ops, 2);
-            panel_op_refresh(panel_m2_ops, 3);
-            panel_op_refresh(panel_c2_ops, 4);
-          }
-          break;
-
-        case KEY_SCAN_CODE_COMMA:
-          if (B_SFTSNS() & 0x01) {
-            
-            // drive change
-            int d = m->mdx_list->path_name[0];
-            int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') - 1 + 26) % 26;
-            while (new_drv >= 0) {
-              int sns = DRVCTRL(0, 1 + new_drv);    // DRVCTRL 0:current 1:A 2:B ...
-              if ((sns & 4) || !(sns & 2)) {
-                //panel_message_show(panel_message, "Drive not ready or no media");
-              } else {
-                if (CHGDRV(new_drv) > new_drv) {    // CHGDRV 0:A 1:B 2:C ...
-                  static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-                  sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-                  update_mdx_list(scr, m, new_mdx_dir);
-                  break;
-                }
+        case KEY_SCAN_CODE_LEFT: {
+          // drive change prev
+          int d = m->mdx_list->path_name[0];
+          int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') - 1 + 26) % 26;
+          while (new_drv >= 0) {
+            int sns = DRVCTRL(0, 1 + new_drv);    // DRVCTRL 0:current 1:A 2:B ...
+            if ((sns & 4) || !(sns & 2)) {
+              //panel_message_show(panel_message, "Drive not ready or no media");
+            } else {
+              if (CHGDRV(new_drv) > new_drv) {    // CHGDRV 0:A 1:B 2:C ...
+                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                update_mdx_list(scr, m, new_mdx_dir);
+                break;
               }
-              new_drv--;
             }
+            new_drv--;
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_RIGHT: {
+          // drive change next
+          int d = m->mdx_list->path_name[0];
+          int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') + 1) % 26;
+          while (new_drv <= 25) {
+            int sns = DRVCTRL(0, new_drv);      // DRVCTRL 0:current 1:A 2:B ...
+            if ((sns & 4) || !(sns & 2)) {
+              //panel_message_show(panel_message, "Drive not ready or no media");
+            } else {
+              if (CHGDRV(new_drv) > new_drv) {  // CHGDRV 0:A 1:B 2:C ...                    
+                static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+                sprintf(new_mdx_dir, "%c:", new_drv + 'A');
+                update_mdx_list(scr, m, new_mdx_dir);
+                break;
+              }
+            }
+            new_drv++;
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_TAB: {
+
+          if (B_SFTSNS() & 0x01) {
+            // voice number prev
+            if (m->voice_set != NULL) {
+              m->voice_index = ( m->voice_index - 1 + m->voice_set->voice_count ) % m->voice_set->voice_count;
+
+              // prepare adsr curves
+              VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
+              opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
+              opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
+              opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
+              opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
+
+              // refresh views
+              WAIT_VSYNC;
+              WAIT_VBLANK;
+
+              panel_con_refresh(panel_con_ops);
+              panel_op_refresh(panel_m1_ops, 1);
+              panel_op_refresh(panel_c1_ops, 2);
+              panel_op_refresh(panel_m2_ops, 3);
+              panel_op_refresh(panel_c2_ops, 4);
+
+              panel_op_envelope_refresh(panel_m1_env, 1);
+              panel_op_envelope_refresh(panel_c1_env, 2);
+              panel_op_envelope_refresh(panel_m2_env, 3);
+              panel_op_envelope_refresh(panel_c2_env, 4);
+            }
+          } else {
+            // voice number next
+            if (m->voice_set != NULL) { 
+              m->voice_index = ( m->voice_index + 1 ) % m->voice_set->voice_count;
+
+              // prepare adsr curves
+              VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
+              opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
+              opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
+              opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
+              opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                      v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
+
+              // refresh views
+              WAIT_VSYNC;
+              WAIT_VBLANK;
+
+              panel_con_refresh(panel_con_ops);
+              panel_op_refresh(panel_m1_ops, 1);
+              panel_op_refresh(panel_c1_ops, 2);
+              panel_op_refresh(panel_m2_ops, 3);
+              panel_op_refresh(panel_c2_ops, 4);
+
+              panel_op_envelope_refresh(panel_m1_env, 1);
+              panel_op_envelope_refresh(panel_c1_env, 2);
+              panel_op_envelope_refresh(panel_m2_env, 3);
+              panel_op_envelope_refresh(panel_c2_env, 4);
+            }
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_COMMA: {
+          if (B_SFTSNS() & 0x01) {
+            // jump to list top
+
 
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_PERIOD:
+        case KEY_SCAN_CODE_PERIOD: {
           if (B_SFTSNS() & 0x01) {
-
-            // drive change
-            int d = m->mdx_list->path_name[0];
-            int new_drv = (((d >= 'a' && d <= 'z') ? d - 'a' : d - 'A') + 1) % 26;
-            while (new_drv <= 25) {
-              int sns = DRVCTRL(0, new_drv);      // DRVCTRL 0:current 1:A 2:B ...
-              if ((sns & 4) || !(sns & 2)) {
-                //panel_message_show(panel_message, "Drive not ready or no media");
-              } else {
-                if (CHGDRV(new_drv) > new_drv) {  // CHGDRV 0:A 1:B 2:C ...                    
-                  static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-                  sprintf(new_mdx_dir, "%c:", new_drv + 'A');
-                  update_mdx_list(scr, m, new_mdx_dir);
-                  break;
-                }
-              }
-              new_drv++;
-            }
+            // jump to list end
 
           } else {
 
@@ -551,8 +622,9 @@ int main(int argc, char* argv[]) {
 
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_YEN:
+        case KEY_SCAN_CODE_YEN: {
 
           // move to root directory
           static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
@@ -560,11 +632,12 @@ int main(int argc, char* argv[]) {
 
           update_mdx_list(scr, m, new_mdx_dir);
           break;
+        }
 
         case KEY_SCAN_CODE_CR:
         case KEY_SCAN_CODE_ENTER:
         case KEY_SCAN_CODE_SPACE:
-        case KEY_SCAN_CODE_BS:
+        case KEY_SCAN_CODE_BS: {
 
           // select and play MDX, or enter a sub directory
           if (m->mdx_list != NULL 
@@ -580,7 +653,7 @@ int main(int argc, char* argv[]) {
 
             // full MDX path name
             strcpy(mdx_full_path_name, m->mdx_list->path_name);
-            strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi));
+            strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi, m->list_sort_order));
 
             // execute external MXP.X to play the selected MDX
             static unsigned char cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
@@ -588,7 +661,12 @@ int main(int argc, char* argv[]) {
             panel_message_show(panel_message, cmd);
             sprintf(cmd, "%s -p %s >NUL", MXP_EXEC, mdx_full_path_name);  // for system exec
             if (system(cmd) != 0) {
-              panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+              static unsigned char mes[256];
+              static unsigned char cwd[256];
+              getcwd(cwd,255);
+              sprintf(mes, "!!! " MXP_EXEC " execution failure. (curdrv=%c,curdir=%s)",'A'+CURDRV(),cwd);
+              panel_message_show(panel_message, mes);
+              //panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure. (curdrv=%c,curdir=%s)",CURDRV(),getpwd());
             } else {
               panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
             }
@@ -618,12 +696,32 @@ int main(int argc, char* argv[]) {
             m->voice_set = mdx_get_voice_set(&mdx);
             m->voice_index = 0;
 
+            // prepare adsr curves
+            VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
+            opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                     v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
+            opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                     v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
+            opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                     v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
+            opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                     v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
+
             // refresh view
+            WAIT_VSYNC;
+            WAIT_VBLANK;
             panel_con_refresh(panel_con_ops);
             panel_op_refresh(panel_m1_ops, 1);
             panel_op_refresh(panel_c1_ops, 2);
             panel_op_refresh(panel_m2_ops, 3);
             panel_op_refresh(panel_c2_ops, 4);
+
+            panel_op_envelope_refresh(panel_m1_env, 1);
+            panel_op_envelope_refresh(panel_c1_env, 2);
+            panel_op_envelope_refresh(panel_m2_env, 3);
+            panel_op_envelope_refresh(panel_c2_env, 4);
+
+            // close MDX
             mdx_close(&mdx);
 
           } else if (m->mdx_list != NULL
@@ -637,7 +735,7 @@ int main(int argc, char* argv[]) {
             // full sub directory path name
             static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
             strcpy(new_mdx_dir, m->mdx_list->path_name);
-            strcat(new_mdx_dir, mdx_list_get_sorted_sub_dir_name(m->mdx_list, si));
+            strcat(new_mdx_dir, mdx_list_get_sorted_sub_dir_name(m->mdx_list, si, 0));
 
             update_mdx_list(scr, m, new_mdx_dir);
 
@@ -654,58 +752,70 @@ int main(int argc, char* argv[]) {
           }
 
           break;
+        }
 
-        case KEY_SCAN_CODE_S:
+        case KEY_SCAN_CODE_R: {
+          // toggle sort order
+          m->list_sort_order = (m->list_sort_order == SORT_ORDER_NORMAL) ? SORT_ORDER_REVERSE : SORT_ORDER_NORMAL;
+          m->list_view_index = 0;
+          panel_mdx_list_refresh(panel_mdx_list);
+          panel_message_show(panel_message, "Reversed sort order.");
+          break;
+        }
+
+        case KEY_SCAN_CODE_S: {
           // pause playing MDX
           panel_message_show(panel_message, MXP_EXEC " -s");
           if (system(MXP_EXEC " -s >NUL") != 0) {
             panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          } else {
-            m->stopped_mdx = 1;
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_C:
+        case KEY_SCAN_CODE_C: {
           // resume playing MDX
           panel_message_show(panel_message, MXP_EXEC " -c");
           if (system(MXP_EXEC "-c >NUL") != 0) {
             panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          } else {
-            m->stopped_mdx = 0;
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_E:
+        case KEY_SCAN_CODE_E: {
           // end playing MDX
           panel_message_show(panel_message, MXP_EXEC " -e");
           if (system(MXP_EXEC "-e >NUL") != 0) {
             panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_F:
+        case KEY_SCAN_CODE_F: {
           // fade out playing MDX
           panel_message_show(panel_message, MXP_EXEC " -f");
           if (system(MXP_EXEC "-f >NUL") != 0) {
             panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_X:
+        case KEY_SCAN_CODE_X: {
           // export voice set
           if (m->voice_set != NULL) {
             panel_message_show(panel_message, "export!!");
           }
           break;
+        }
 
-        case KEY_SCAN_CODE_H:
+        case KEY_SCAN_CODE_H: {
           // show help message
           panel_message_show(panel_message, "MDXVV version " VERSION " by tantan");
           panel_message_show(panel_message, "UP/DOWN: Select MDX  CR/ENTER: Play MDX or Move Dir");
-          panel_message_show(panel_message, "LEFT/RIGHT: Change Voice   SPACE/BS: Play and Down/Up");
-          panel_message_show(panel_message, ".: Parent Dir  \\: Root Dir  </>: Change Drive");
-          panel_message_show(panel_message, "S/C: Pause/Resume  X: Voice Data Export  ESC/Q: Quit MDXVV");
+          panel_message_show(panel_message, "TAB: Change Voice  SPACE/BS: Play and Down/Up  </>:List Top/Bottom");
+          panel_message_show(panel_message, ".: Parent Dir  \\: Root Dir  LEFT/RIGHT: Change Drive  r:Revese Sort");
+          panel_message_show(panel_message, "s/c: Pause/Resume  x: Voice Data Export  ESC/q: Quit MDXVV");
           break;
+        }
 
       }
     }

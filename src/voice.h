@@ -30,21 +30,21 @@ typedef struct {
 
   unsigned int voice_id;
 
-  time_t create_time;
-  time_t update_time;
+//  time_t create_time;
+//  time_t update_time;
   
   unsigned char version[8];
 
   unsigned char name[24];
-  unsigned char tag1[8];
-  unsigned char tag2[8];
-  unsigned char tag3[8];
-  unsigned char tag4[8];
+//  unsigned char tag1[8];
+//  unsigned char tag2[8];
+//  unsigned char tag3[8];
+//  unsigned char tag4[8];
   unsigned char comment[64];
 
-  unsigned char favorite;
-  unsigned char selected;         // for UI use only (not serialized)
-  unsigned char deleted;          // for UI use only (not serialized)
+//  unsigned char favorite;
+//  unsigned char selected;         // for UI use only (not serialized)
+//  unsigned char deleted;          // for UI use only (not serialized)
 
   unsigned char connection;
   unsigned char feedback;
@@ -111,17 +111,17 @@ typedef struct {
 
 typedef struct {
 
-  unsigned int voice_set_id;
-  unsigned char version[8];
+//  unsigned int voice_set_id;
+//  unsigned char version[8];
 
-  time_t create_time;
-  time_t update_time;
+//  time_t create_time;
+//  time_t update_time;
 
   unsigned char name[32];
-  unsigned char tag1[8];
-  unsigned char tag2[8];
-  unsigned char tag3[8];
-  unsigned char tag4[8];
+//  unsigned char tag1[8];
+//  unsigned char tag2[8];
+//  unsigned char tag3[8];
+//  unsigned char tag4[8];
   unsigned char comment[256];
 
   int voice_count;

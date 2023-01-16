@@ -6,7 +6,6 @@
 #include "mdx.h"
 #include "voice.h"
 #include "memory.h"
-#include "mdxvcat.h"
 
 #define HIGH_MEMORY_USE  (0)
 
@@ -123,7 +122,8 @@ int mdx_open(MDX* mdx, const unsigned char* file_name) {
   // count voices
   mdx->voice_count = ( mdx->data_len - mdx->voice_offset ) / MDX_VOICE_LEN;
 
-  // channel data offset
+  // channel data offset (no use in MDXVV)
+/*
   for (int i = 0; i < 9; i++) {   // OPM 8 + PCM 1
     mdx->channel_offset[i] = ofs_base + ( mdx->data_buffer[ ofs ] * 256 ) + mdx->data_buffer[ ofs + 1 ];
     if (mdx->channel_offset[i] > mdx->data_len) {
@@ -146,7 +146,7 @@ int mdx_open(MDX* mdx, const unsigned char* file_name) {
       mdx->channel_offset[i] = 0;
     }
   }
-
+*/
   goto exit;
 
 catch:
@@ -175,18 +175,18 @@ VOICE_SET* mdx_get_voice_set(MDX* mdx) {
 
   VOICE_SET* vs = malloc_himem(sizeof(VOICE_SET), HIGH_MEMORY_USE);
 
-  vs->voice_set_id = time(NULL);
-  strcpy(vs->version, VERSION);
+//  vs->voice_set_id = time(NULL);
+//  strcpy(vs->version, "TBD");
 
-  vs->create_time = time(NULL);
-  vs->update_time = vs->create_time;
+//  vs->create_time = time(NULL);
+//  vs->update_time = vs->create_time;
   
   strcpy(vs->name, mdx->file_name);
 
-  vs->tag1[0] = '\0';
-  vs->tag2[0] = '\0';
-  vs->tag3[0] = '\0';
-  vs->tag4[0] = '\0';
+//  vs->tag1[0] = '\0';
+//  vs->tag2[0] = '\0';
+//  vs->tag3[0] = '\0';
+//  vs->tag4[0] = '\0';
 
   strcpy(vs->comment, mdx->data_title);
 
@@ -198,17 +198,17 @@ VOICE_SET* mdx_get_voice_set(MDX* mdx) {
     VOICE* v = &(vs->voices[i]);
 
     v->voice_id = i;
-    v->create_time = vs->create_time;
-    v->update_time = vs->update_time;
+//    v->create_time = vs->create_time;
+//    v->update_time = vs->update_time;
     v->name[0] = '\0';
-    v->tag1[0] = '\0';
-    v->tag2[0] = '\0';
-    v->tag3[0] = '\0';
-    v->tag4[0] = '\0';
+//    v->tag1[0] = '\0';
+//    v->tag2[0] = '\0';
+//    v->tag3[0] = '\0';
+//    v->tag4[0] = '\0';
     v->comment[0] = '\0';
-    v->favorite = 0;
-    v->selected = 0;
-    v->deleted = 0;
+//    v->favorite = 0;
+//    v->selected = 0;
+//    v->deleted = 0;
 
     unsigned char* vbuf = &(mdx->data_buffer[ mdx->voice_offset + i * MDX_VOICE_LEN ]);
 
@@ -313,12 +313,12 @@ void mdx_describe(MDX* mdx) {
   printf("pcm name: [%s]\n", mdx->pcm_file_name);
   printf("voice offset: %d\n", mdx->voice_offset);
   printf("voice count: %d\n", mdx->voice_count);
-  for (int i = 0; i < 8; i++) {
-    printf("channel offset %C: %d\n", 'A'+i, mdx->channel_offset[i]);
-  }
-  for (int i = 0; i < 8; i++) {
-    printf("channel offset %C: %d\n", 'P'+i, mdx->channel_offset[i+8]);
-  }
+  //for (int i = 0; i < 8; i++) {
+  //  printf("channel offset %C: %d\n", 'A'+i, mdx->channel_offset[i]);
+  //}
+  //for (int i = 0; i < 8; i++) {
+  //  printf("channel offset %C: %d\n", 'P'+i, mdx->channel_offset[i+8]);
+  //}
 }
 
 // open new MDX list
@@ -475,30 +475,30 @@ exit:
 }
 
 // return sorted file name pointer
-unsigned char* mdx_list_get_sorted_file_name(MDX_LIST* mdx_list, int mi) {
+unsigned char* mdx_list_get_sorted_file_name(MDX_LIST* mdx_list, int mi, int order) {
   unsigned char* p;
   if (mdx_list != NULL) {
-    int mi_sorted = mdx_list->mdx_sort_indexes[ mi ];
+    int mi_sorted = (order == 0) ? mdx_list->mdx_sort_indexes[ mi ] : mdx_list->mdx_sort_indexes[ mdx_list->mdx_count - 1 - mi ];
     p = mdx_list->file_names + MDX_MAX_FILE_NAME_LEN * mi_sorted;
   }
   return p;
 }
 
 // return sorted data title pointer
-unsigned char* mdx_list_get_sorted_data_title(MDX_LIST* mdx_list, int mi) {
+unsigned char* mdx_list_get_sorted_data_title(MDX_LIST* mdx_list, int mi, int order) {
   unsigned char* p;
   if (mdx_list != NULL) {
-    int mi_sorted = mdx_list->mdx_sort_indexes[ mi ];
+    int mi_sorted = (order == 0) ? mdx_list->mdx_sort_indexes[ mi ] : mdx_list->mdx_sort_indexes[ mdx_list->mdx_count - 1 - mi ];
     p = mdx_list->data_titles + MDX_MAX_DATA_TITLE_LEN * mi_sorted;
   }
   return p;
 }
 
 // return sorted sub dir name pointer
-unsigned char* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int si) {
+unsigned char* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int si, int order) {
   unsigned char* p;
   if (mdx_list != NULL) {
-    int si_sorted = mdx_list->sub_dir_sort_indexes[ si ];
+    int si_sorted = (order == 0) ? mdx_list->sub_dir_sort_indexes[ si ] : mdx_list->sub_dir_sort_indexes[ mdx_list->sub_dir_count - 1 - si ];
     p = mdx_list->sub_dir_names + MDX_MAX_FILE_NAME_LEN * si_sorted;
   }
   return p;
