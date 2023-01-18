@@ -293,7 +293,7 @@ static int compare_mdx_file_names(const void* n1, const void* n2) {
   int idx2 = *((int*)n2);
   unsigned char* str1 = g_mdx_file_names + MDX_MAX_FILE_NAME_LEN * idx1;
   unsigned char* str2 = g_mdx_file_names + MDX_MAX_FILE_NAME_LEN * idx2;
-  return strcmp(str1,str2);
+  return stricmp(str1,str2);
 }
 
 // quick sort helper
@@ -303,7 +303,7 @@ static int compare_sub_dir_names(const void* n1, const void* n2) {
   int idx2 = *((int*)n2);
   unsigned char* str1 = g_sub_dir_names + MDX_MAX_FILE_NAME_LEN * idx1;
   unsigned char* str2 = g_sub_dir_names + MDX_MAX_FILE_NAME_LEN * idx2;
-  return strcmp(str1,str2);
+  return stricmp(str1,str2);
 }
 
 // describe MDX

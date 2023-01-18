@@ -1,7 +1,7 @@
 #include <math.h>
 #include "opm.h"
 
-#define X_SCALE (1.5)
+#define X_SCALE (1.8)
 
 //
 //  OPM ADSR envelope (not accurate!)
@@ -19,28 +19,28 @@ void opm_adsr(float* output, int num_samples, int key_off, int attack_rate, int 
     
   if (attack_time > 0) {
     while (n < attack_time) {
-      output[n] = 1.0 - exp(-5.0 * n / attack_time);
+      output[n] = 1.0 - exp(-5.0 * n / (float)attack_time);
       n++;
     }
   }
   
   if (decay_time1 > 0) {
     while (n < attack_time + decay_time1) {
-      output[n] = decay_level + (1.0 - decay_level) * exp(-5.0 * (n - attack_time) / decay_time1);
+      output[n] = decay_level + (1.0 - decay_level) * exp(-5.0 * (n - attack_time) / (float)decay_time1);
       n++;
     }
   }
   
   if (decay_time2 > 0) {
-    while (n < key_off) {
-      output[n] = output[ attack_time + decay_time1 - 1 ] * exp(-5.0 * (n - attack_time - decay_time1) / decay_time2);
+    while (n < key_off && n < num_samples) {
+      output[n] = output[ attack_time + decay_time1 - 1 ] * exp(-5.0 * (n - attack_time - decay_time1) / (float)decay_time2);
       n++;
     }
   }
 
   if (release_time > 0) {
     while (n < num_samples) {
-      output[n] = output[ key_off - 1 ] * exp(-5.0 * (n - key_off + 1) / release_time);
+      output[n] = output[ key_off - 1 ] * exp(-5.0 * (n - key_off + 1) / (float)release_time);
       n++;
     }
   }

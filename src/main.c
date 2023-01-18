@@ -59,8 +59,12 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->scr = scr;
   p->model = model;
 
-  panel_put_text(p, 8, 0, COLOR_DARK_PURPLE, FONT_BOLD, "&PLAY   &STOP   E&XPORT   &QUIT   &HELP");
-  panel_put_text_right(p, 0, COLOR_DARK_PURPLE, FONT_REGULAR, "- MDXVV v" VERSION " - ");
+  panel_put_text(p, 8, 2, COLOR_DARK_PURPLE, FONT_BOLD, "E&XPORT   &QUIT   &HELP");
+  //panel_put_text(p, 8, 0, COLOR_DARK_PURPLE, FONT_BOLD, "&PLAY   &STOP   E&XPORT   &QUIT   &HELP");
+  //panel_put_text_right(p, 0, COLOR_DARK_PURPLE, FONT_REGULAR, "- MDXVV v" VERSION);
+  panel_put_text(p, 288, 2, COLOR_DARK_PURPLE, FONT_BOLD, "MDXVV.X");
+  //panel_put_bitmap(p, 288, 0, LOGO_WIDTH, LOGO_HEIGHT, COLOR_DARK_PURPLE, mdxvv_logo_data);
+  panel_put_text(p, 288 + 8*8, 2, COLOR_DARK_PURPLE, FONT_REGULAR, "v" VERSION);
   panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
 
   // connection operation panel
@@ -115,7 +119,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
 //  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP1 ( M1 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M1 ( OP1 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M1 [ OP1 ]" );
 
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -141,7 +145,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
 //  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP2 ( C1 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C1 ( OP2 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C1 [ OP2 ]" );
   
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -167,7 +171,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
 //  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP3 ( M2 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M2 ( OP3 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M2 [ OP3 ]" );
   
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -193,7 +197,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
 
   panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
 //  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 ( OP4 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 [ OP4 ]" );
 
   panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
   panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
@@ -410,12 +414,24 @@ int main(int argc, char* argv[]) {
   // exit code
   int rc = 1;
 
+  // graphic preservation
+  int preserve_graphic = 0;
+
   // argument check
   static unsigned char mdx_dir[ MAX_PATH_LEN ];
-  if (argc >= 2) {
-    strcpy(mdx_dir, argv[1]);
-  } else {
-    strcpy(mdx_dir, ".");
+  strcpy(mdx_dir, ".");
+  for (int i = 1; i < argc; i++) {
+    if (argv[i][0] == '-' && strlen(argv[i]) >= 2) {
+      if (argv[i][1] == 'g') {
+        preserve_graphic = 1;
+      } else {
+        printf("error: unknown option.");
+        goto exit;
+      }
+      continue;
+    }
+    strcpy(mdx_dir, argv[i]);
+    break;
   }
 
   // supervisor mode
@@ -429,7 +445,7 @@ int main(int argc, char* argv[]) {
   // create screen instance
   static SCREEN_HANDLE screen_handle = { 0 };
   SCREEN_HANDLE* scr = &screen_handle;
-  screen_init(scr, 16);
+  screen_init(scr, preserve_graphic);
   screen_init_font(scr);
 
   // create MVC view
@@ -437,7 +453,7 @@ int main(int argc, char* argv[]) {
 
   // opening message
   PANEL* panel_message = screen_get_panel(scr, PANEL_MESSAGE);
-  panel_message_show(panel_message, "MDXVV version " VERSION " by tantan");
+  panel_message_show(panel_message, "MDXVV.X v" VERSION);
   panel_message_show(panel_message, "Completed initialization successfully.");
 
   // display panel shortcuts
@@ -526,114 +542,6 @@ int main(int argc, char* argv[]) {
           break;
         }
 
-        case KEY_SCAN_CODE_TAB: {
-
-          if (B_SFTSNS() & 0x01) {
-            // voice number prev
-            if (m->voice_set != NULL) {
-              m->voice_index = ( m->voice_index - 1 + m->voice_set->voice_count ) % m->voice_set->voice_count;
-
-              // prepare adsr curves
-              VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
-              opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
-              opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
-              opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
-              opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
-
-              // refresh views
-              WAIT_VSYNC;
-              WAIT_VBLANK;
-
-              panel_con_refresh(panel_con_ops);
-              panel_op_refresh(panel_m1_ops, 1);
-              panel_op_refresh(panel_c1_ops, 2);
-              panel_op_refresh(panel_m2_ops, 3);
-              panel_op_refresh(panel_c2_ops, 4);
-
-              panel_op_envelope_refresh(panel_m1_env, 1);
-              panel_op_envelope_refresh(panel_c1_env, 2);
-              panel_op_envelope_refresh(panel_m2_env, 3);
-              panel_op_envelope_refresh(panel_c2_env, 4);
-            }
-          } else {
-            // voice number next
-            if (m->voice_set != NULL) { 
-              m->voice_index = ( m->voice_index + 1 ) % m->voice_set->voice_count;
-
-              // prepare adsr curves
-              VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
-              opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
-              opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
-              opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
-              opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
-                      v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
-
-              // refresh views
-              WAIT_VSYNC;
-              WAIT_VBLANK;
-
-              panel_con_refresh(panel_con_ops);
-              panel_op_refresh(panel_m1_ops, 1);
-              panel_op_refresh(panel_c1_ops, 2);
-              panel_op_refresh(panel_m2_ops, 3);
-              panel_op_refresh(panel_c2_ops, 4);
-
-              panel_op_envelope_refresh(panel_m1_env, 1);
-              panel_op_envelope_refresh(panel_c1_env, 2);
-              panel_op_envelope_refresh(panel_m2_env, 3);
-              panel_op_envelope_refresh(panel_c2_env, 4);
-            }
-          }
-          break;
-        }
-
-        case KEY_SCAN_CODE_COMMA: {
-          if (B_SFTSNS() & 0x01) {
-            // jump to list top
-
-
-          }
-          break;
-        }
-
-        case KEY_SCAN_CODE_PERIOD: {
-          if (B_SFTSNS() & 0x01) {
-            // jump to list end
-
-          } else {
-
-            // move to parent directory (if exists)
-            if (strcmp(m->mdx_list->sub_dir_names + 0, "..") == 0) {
-
-              // full sub directory path name
-              static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-              strcpy(new_mdx_dir, m->mdx_list->path_name);
-              strcat(new_mdx_dir, "..");
-
-              update_mdx_list(scr, m, new_mdx_dir);
-            }
-
-          }
-          break;
-        }
-
-        case KEY_SCAN_CODE_YEN: {
-
-          // move to root directory
-          static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
-          sprintf(new_mdx_dir, "%c:\\", m->mdx_list->path_name[0]);
-
-          update_mdx_list(scr, m, new_mdx_dir);
-          break;
-        }
-
         case KEY_SCAN_CODE_CR:
         case KEY_SCAN_CODE_ENTER:
         case KEY_SCAN_CODE_SPACE:
@@ -644,7 +552,7 @@ int main(int argc, char* argv[]) {
               && m->mdx_list->mdx_count > 0 
               && m->list_view_index + m->list_index >= m->mdx_list->sub_dir_count) {
 
-            // selected a MDX file
+            // selected MDX file
             static unsigned char mdx_full_path_name[ MAX_PATH_LEN ];
             static MDX mdx;
 
@@ -661,12 +569,7 @@ int main(int argc, char* argv[]) {
             panel_message_show(panel_message, cmd);
             sprintf(cmd, "%s -p %s >NUL", MXP_EXEC, mdx_full_path_name);  // for system exec
             if (system(cmd) != 0) {
-              static unsigned char mes[256];
-              static unsigned char cwd[256];
-              getcwd(cwd,255);
-              sprintf(mes, "!!! " MXP_EXEC " execution failure. (curdrv=%c,curdir=%s)",'A'+CURDRV(),cwd);
-              panel_message_show(panel_message, mes);
-              //panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure. (curdrv=%c,curdir=%s)",CURDRV(),getpwd());
+              panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
             } else {
               panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
             }
@@ -735,7 +638,7 @@ int main(int argc, char* argv[]) {
             // full sub directory path name
             static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
             strcpy(new_mdx_dir, m->mdx_list->path_name);
-            strcat(new_mdx_dir, mdx_list_get_sorted_sub_dir_name(m->mdx_list, si, 0));
+            strcat(new_mdx_dir, mdx_list_get_sorted_sub_dir_name(m->mdx_list, si, m->list_sort_order));
 
             update_mdx_list(scr, m, new_mdx_dir);
 
@@ -751,6 +654,88 @@ int main(int argc, char* argv[]) {
 
           }
 
+          break;
+        }
+
+        case KEY_SCAN_CODE_TAB: {
+
+          if (m->voice_set != NULL) {
+            if (B_SFTSNS() & 0x01) {
+              // voice number prev
+              m->voice_index = ( m->voice_index - 1 + m->voice_set->voice_count ) % m->voice_set->voice_count;
+            } else {
+              // voice number next
+              m->voice_index = ( m->voice_index + 1 ) % m->voice_set->voice_count;
+            }
+
+            // prepare adsr curves
+            VOICE* v = &(m->voice_set->voices[ m->voice_index ]);
+            opm_adsr(m->adsr_m1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                    v->attack_rate_m1, v->decay_rate1_m1, v->decay_rate2_m1, v->release_rate_m1, v->decay_level1_m1);
+            opm_adsr(m->adsr_c1, ADSR_WIDTH, ADSR_KEY_OFF, 
+                    v->attack_rate_c1, v->decay_rate1_c1, v->decay_rate2_c1, v->release_rate_c1, v->decay_level1_c1);
+            opm_adsr(m->adsr_m2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                    v->attack_rate_m2, v->decay_rate1_m2, v->decay_rate2_m2, v->release_rate_m2, v->decay_level1_m2);
+            opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
+                    v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
+
+            // wait vsync
+            WAIT_VSYNC;
+            WAIT_VBLANK;
+
+            // refresh ops panels
+            panel_con_refresh(panel_con_ops);
+            panel_op_refresh(panel_m1_ops, 1);
+            panel_op_refresh(panel_c1_ops, 2);
+            panel_op_refresh(panel_m2_ops, 3);
+            panel_op_refresh(panel_c2_ops, 4);
+
+            // refresh envelope panels
+            panel_op_envelope_refresh(panel_m1_env, 1);
+            panel_op_envelope_refresh(panel_c1_env, 2);
+            panel_op_envelope_refresh(panel_m2_env, 3);
+            panel_op_envelope_refresh(panel_c2_env, 4);
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_COMMA: {
+          if (B_SFTSNS() & 0x01) {
+            // '<' jump to list top
+
+
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_PERIOD: {
+          if (B_SFTSNS() & 0x01) {
+            // '>' jump to list end
+
+          } else {
+
+            // '.' move to parent directory (if exists)
+            if (strcmp(m->mdx_list->sub_dir_names + 0, "..") == 0) {
+
+              // full sub directory path name
+              static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+              strcpy(new_mdx_dir, m->mdx_list->path_name);
+              strcat(new_mdx_dir, "..");
+
+              update_mdx_list(scr, m, new_mdx_dir);
+            }
+
+          }
+          break;
+        }
+
+        case KEY_SCAN_CODE_YEN: {
+
+          // '\' move to root directory
+          static unsigned char new_mdx_dir[ MAX_PATH_LEN ];
+          sprintf(new_mdx_dir, "%c:\\", m->mdx_list->path_name[0]);
+
+          update_mdx_list(scr, m, new_mdx_dir);
           break;
         }
 
@@ -799,6 +784,43 @@ int main(int argc, char* argv[]) {
           break;
         }
 
+        case KEY_SCAN_CODE_M: {
+          if (B_SFTSNS() & 0x01) {
+            // 'M' execute external MMMDSP.r to play the selected MDX
+
+            // selected MDX file
+            static unsigned char mdx_full_path_name[ MAX_PATH_LEN ];
+
+            // selected MDX index
+            int mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
+
+            // full MDX path name
+            strcpy(mdx_full_path_name, m->mdx_list->path_name);
+            strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi, m->list_sort_order));
+
+            // execute MMDSP
+            static unsigned char cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
+            sprintf(cmd, "%s %s", MMDSP_EXEC, mdx_full_path_name);   // for message
+            panel_message_show(panel_message, cmd);
+            sprintf(cmd, "%s %s >NUL", MMDSP_EXEC, mdx_full_path_name);  // for system exec
+            if (system(cmd) != 0) {
+              panel_message_show(panel_message, "!!! " MMDSP_EXEC " execution failure.");
+            } else {
+              // recreate full view
+              C_FNKMOD(3);
+              C_CUROFF();
+              m->list_index = 0;
+              m->list_view_index = 0;
+              m->message_index = 0;
+              create_view(scr, m);
+              panel_mdx_play_show_path(panel_mdx_play);
+              panel_mdx_list_refresh(panel_mdx_list);
+              //panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
+            }
+          }
+          break;
+        }
+
         case KEY_SCAN_CODE_X: {
           // export voice set
           if (m->voice_set != NULL) {
@@ -809,11 +831,11 @@ int main(int argc, char* argv[]) {
 
         case KEY_SCAN_CODE_H: {
           // show help message
-          panel_message_show(panel_message, "MDXVV version " VERSION " by tantan");
+          panel_message_show(panel_message, "MDXVV.X version " VERSION);
           panel_message_show(panel_message, "UP/DOWN: Select MDX  CR/ENTER: Play MDX or Move Dir");
-          panel_message_show(panel_message, "TAB: Change Voice  SPACE/BS: Play and Down/Up  </>:List Top/Bottom");
-          panel_message_show(panel_message, ".: Parent Dir  \\: Root Dir  LEFT/RIGHT: Change Drive  r:Revese Sort");
-          panel_message_show(panel_message, "s/c: Pause/Resume  x: Voice Data Export  ESC/q: Quit MDXVV");
+          panel_message_show(panel_message, "SPACE/BS: Play and Down/Up  S/C: Pause/Resume  </>:List Top/Bottom");
+          panel_message_show(panel_message, ".: Parent Dir  \\: Root Dir  LEFT/RIGHT: Change Drive  R:Revese Sort");
+          panel_message_show(panel_message, "TAB: Change Voice  X: Voice Data Export  ESC/Q: Quit MDXVV");
           break;
         }
 
@@ -834,7 +856,7 @@ quit:
   }
 
   // reset screen
-  screen_reset(scr, 16);
+  screen_reset(scr, preserve_graphic);
 
   // resume current drive and directory
   CHGDRV(m->original_current_drive);

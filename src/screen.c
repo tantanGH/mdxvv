@@ -4,11 +4,24 @@
 
 #include "screen.h"
 
-// clear and initialize screen and sprites
-void screen_init(SCREEN_HANDLE* scr, int mode) {
+static void clear_text_screen() {
+  struct TXFILLPTR fill = { 0, 0, 0, 768, 512, 0 };
+  for (int i = 0; i < 4; i++) {
+    fill.vram_page = i;
+    TXFILL(&fill);  
+  }
+}
 
-  CRTMOD(mode);
-  G_CLR_ON();
+// clear and initialize screen and sprites
+void screen_init(SCREEN_HANDLE* scr, int preserve_graphic) {
+
+  if (preserve_graphic) {
+    // text clear only
+    clear_text_screen();
+  } else {
+    CRTMOD(16);
+    G_CLR_ON();
+  }
 
   scr->original_fnk_mode = C_FNKMOD(-1);
   C_FNKMOD(3);
@@ -25,19 +38,17 @@ void screen_init(SCREEN_HANDLE* scr, int mode) {
   TPALET(1, PALETTE_COLOR1);
   TPALET(2, PALETTE_COLOR2);
   TPALET(3, PALETTE_COLOR3);
-
-  // set graphic palette (for ADSR & wave chart visualization use only)
-  GPALET(0, PALETTE_COLOR0);
-  GPALET(1, PALETTE_COLOR1);
-  GPALET(2, PALETTE_COLOR2);
-  GPALET(3, PALETTE_COLOR3);
 }
 
 // reset screen
-void screen_reset(SCREEN_HANDLE* scr, int mode) {
+void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic) {
 
-  CRTMOD(mode);
-  G_CLR_ON();
+  if (preserve_graphic) {
+    clear_text_screen();
+  } else {
+    CRTMOD(16);
+    G_CLR_ON();
+  }
 
   C_FNKMOD(scr->original_fnk_mode);
   C_CURON();

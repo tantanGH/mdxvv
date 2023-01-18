@@ -36,13 +36,13 @@ CFLAGS = $(COMMON_FLAGS) -Wno-builtin-declaration-mismatch -fcall-used-d2 -fcall
     -fexec-charset=cp932 -fverbose-asm -fno-defer-pop
 
 # *.c ソースファイル
-C_SRCS = memory.c voice.c mdx.c opm.c screen.c panel.c mdxvv.c
+C_SRCS = memory.c voice.c mdx.c opm.c screen.c panel.c main.c
 
 # *.s ソースファイル
 ASM_SRCS =
 
 # *.h source files
-HEADER_SRCS = data/diagram.h memory.h voice.h mdx.h opm.h panel.h screen.h model.h keyboard.h mdxvv.h
+HEADER_SRCS = memory.h voice.h mdx.h opm.h diagram.h panel.h screen.h model.h keyboard.h mdxvv.h
 
 # リンク対象のライブラリファイル
 LIBS =\

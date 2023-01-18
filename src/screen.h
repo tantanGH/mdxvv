@@ -80,8 +80,8 @@ typedef struct {
 } SCREEN_HANDLE;
 
 // prototype declarations for SCREEN_HANDLE
-void screen_init(SCREEN_HANDLE* scr, int mode);
-void screen_reset(SCREEN_HANDLE* scr, int mode);
+void screen_init(SCREEN_HANDLE* scr, int preserve_graphic);
+void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic);
 void screen_init_font(SCREEN_HANDLE* scr);
 PANEL* screen_get_panel(SCREEN_HANDLE* scr, int panel_id);
 
