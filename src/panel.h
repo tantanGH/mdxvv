@@ -67,6 +67,7 @@ void panel_mdx_list_down(PANEL* panel);
 
 void panel_mdx_play_show_path(PANEL* panel);
 void panel_mdx_play_show_title(PANEL* panel);
+void panel_mdx_play_prompt(PANEL* panel, int offset, int clear, const unsigned char* text);
 
 void panel_message_show(PANEL* panel, const unsigned char* text);
 

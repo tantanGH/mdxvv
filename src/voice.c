@@ -10,9 +10,11 @@ void voice_set_close(VOICE_SET* vs) {
   }
 }
 
-void voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
+int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
 
-  if (vs == NULL || vs->voices == NULL || fp == NULL) return;
+  int rc = -1;
+
+  if (vs == NULL || vs->voices == NULL || fp == NULL) goto exit;
 
   int line = 1000;
 
@@ -34,6 +36,8 @@ void voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
       fprintf(fp, "%d /* %s */\n", line+10, vs->name);
       line += 100;
       break;
+    default:
+      goto exit;
   }
 
   for (int i = 0; i < vs->voice_count; i++) {
@@ -162,5 +166,10 @@ void voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
   if (format == FORMAT_BAS) {
     fprintf(fp, "\x1a");
   }
+
+  rc = 0;
+
+exit:
+  return rc;
 }
 

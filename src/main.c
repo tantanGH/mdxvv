@@ -195,7 +195,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->scr = scr;
   p->model = model;
 
-  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
 //  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
   panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 [ OP4 ]" );
 
@@ -266,10 +267,12 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->scr = scr;
   p->model = model;
 
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
   //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
   panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
   panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
 
   // operator m1 wave panel
   p = screen_get_panel(scr, PANEL_M1_WAVE);
@@ -323,9 +326,12 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->scr = scr;
   p->model = model;
 
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
   panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, p->height-1, p->width+1, COLOR_DARK_PURPLE);
 
   // mdx play panel
   p = screen_get_panel(scr, PANEL_MDX_PLAY);
@@ -362,6 +368,86 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);  
+}
+
+// mdx voice set export event helper
+static void export_voice_set(SCREEN_HANDLE* scr, MODEL* m) {
+
+  if (scr == NULL || m == NULL || m->voice_set == NULL) return;
+
+  static unsigned char export_file_name[ MAX_PATH_LEN ];
+  static unsigned char export_format_name [ 4 ];
+  static unsigned char mes[ MAX_MES_LEN ];
+
+  PANEL* panel_mdx_play = screen_get_panel(scr, PANEL_MDX_PLAY);  
+  PANEL* panel_message = screen_get_panel(scr, PANEL_MESSAGE);
+
+  panel_mdx_play_prompt(panel_mdx_play, 1, 1, "EXPORT FORMAT (1:MDX 2:ZMS 3:XC 4:BAS ESC:CANCEL) >");
+  int export_format = INKEY();    // no break check
+  if (export_format < '1' || export_format > '4') {
+    panel_message_show(panel_message, "Canceled export.");
+    goto export_end;
+  } else {
+    strcpy(export_format_name, export_format == '4' ? "BAS" : export_format == '3' ? "XC" :  export_format == '2' ? "ZMS" : "MDX");
+    sprintf(mes, "Export format is %c:%s", export_format, export_format_name);
+    panel_message_show(panel_message, mes);
+  }
+
+  panel_mdx_play_prompt(panel_mdx_play, 1, 1, "EXPORT FILE NAME (ESC:CANCEL)>");
+  int ofs = 0;
+  int c;
+  do {
+    c = INKEY();        // no break check
+    if (c == 27) {      // ESC
+      panel_message_show(panel_message, "Canceled export.");
+      goto export_end;
+    }
+    if (c == 8) {       // BS
+      if (ofs > 0) {
+        ofs--;
+        mes[0] = ' ';
+        mes[1] = '\0';
+        panel_mdx_play_prompt(panel_mdx_play, 31*8 + ofs*8, 0, mes);
+      }
+      continue;
+    }
+    if ((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_' || c == ':' || c == '.' || c == '/' || c == '\\') {
+      if (ofs < 80) {
+        export_file_name[ ofs ] = c;
+        export_file_name[ ofs + 1 ] = '\0';
+        panel_mdx_play_prompt(panel_mdx_play, 31*8 + ofs*8, 0, export_file_name + ofs);
+        ofs++;
+      }
+      continue;
+    }
+  } while (c != 13);    // ENTER
+
+  if (strlen(export_file_name) > 0) {
+    struct FILBUF filbuf;
+    if (FILES(&filbuf, export_file_name, 0x33) >= 0) {
+      panel_mdx_play_prompt(panel_mdx_play, 1, 1, "FILE EXISTS. OVERWRITE? (Y/N) >");
+      int c = INKEY();
+      if (c != 'y' && c != 'Y') {
+        panel_message_show(panel_message, "Canceled export.");
+        goto export_end;                  
+      }
+    }
+    FILE* fp = NULL;
+    if ((fp = fopen(export_file_name,"w")) == NULL) {
+      panel_message_show(panel_message, "!!! Export file open error.");
+      goto export_end;
+    }
+    if (voice_set_fwrite(m->voice_set, fp, export_format - '1') != 0) {
+      panel_message_show(panel_message, "!!! Export error.");
+      goto export_end;                
+    }
+    fclose(fp);
+    sprintf(mes, "Exported voice data to %s in %s format successfully.", export_file_name, export_format_name);
+    panel_message_show(panel_message, mes);
+  }
+
+export_end:
+  panel_mdx_play_show_title(panel_mdx_play);
 }
 
 // mdx list update event helper
@@ -824,7 +910,7 @@ int main(int argc, char* argv[]) {
         case KEY_SCAN_CODE_X: {
           // export voice set
           if (m->voice_set != NULL) {
-            panel_message_show(panel_message, "export!!");
+            export_voice_set(scr, m);
           }
           break;
         }

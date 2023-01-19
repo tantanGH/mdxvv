@@ -823,14 +823,23 @@ void panel_mdx_play_show_path(PANEL* panel) {
 // show mdx data title
 void panel_mdx_play_show_title(PANEL* panel) {
   if (panel != NULL) {
-
-    WAIT_VBLANK;
-
     MODEL* m = panel->model;
+    WAIT_VBLANK;
     panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
     if ((m->mdx_list->sub_dir_count + m->mdx_list->mdx_count) > 0) {
       int mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
       panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi, m->list_sort_order));
     }
+  }
+}
+
+// show voice data export prompt
+void panel_mdx_play_prompt(PANEL* panel, int offset, int clear, const unsigned char* text) {
+  if (panel != NULL) {
+    WAIT_VBLANK;
+    if (clear) {
+      panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
+    }
+    panel_put_text16(panel, 4 + 8*16 + offset, 3, COLOR_WHITE, text);
   }
 }

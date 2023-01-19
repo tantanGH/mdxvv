@@ -498,7 +498,8 @@ unsigned char* mdx_list_get_sorted_data_title(MDX_LIST* mdx_list, int mi, int or
 unsigned char* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int si, int order) {
   unsigned char* p;
   if (mdx_list != NULL) {
-    int si_sorted = (order == 0) ? mdx_list->sub_dir_sort_indexes[ si ] : mdx_list->sub_dir_sort_indexes[ mdx_list->sub_dir_count - 1 - si ];
+    // ".." must be the top always
+    int si_sorted = (si == 0) ? 0 : (order == 0) ? mdx_list->sub_dir_sort_indexes[ si ] : mdx_list->sub_dir_sort_indexes[ mdx_list->sub_dir_count - 1 - si ];
     p = mdx_list->sub_dir_names + MDX_MAX_FILE_NAME_LEN * si_sorted;
   }
   return p;

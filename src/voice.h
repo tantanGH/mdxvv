@@ -130,7 +130,7 @@ typedef struct {
 } VOICE_SET;
 
 // prototype declarations for VOICE_SET
-void voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format);
+int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format);
 void voice_set_close(VOICE_SET* vs);
 
 #endif
