@@ -30,21 +30,9 @@ typedef struct {
 
   int32_t voice_id;
 
-//  time_t create_time;
-//  time_t update_time;
-  
   uint8_t version[8];
-
   uint8_t name[24];
-//  uint8_t tag1[8];
-//  uint8_t tag2[8];
-//  uint8_t tag3[8];
-//  uint8_t tag4[8];
   uint8_t comment[64];
-
-//  uint8_t favorite;
-//  uint8_t selected;         // for UI use only (not serialized)
-//  uint8_t deleted;          // for UI use only (not serialized)
 
   uint8_t connection;
   uint8_t feedback;
@@ -111,26 +99,16 @@ typedef struct {
 
 typedef struct {
 
-//  unsigned int voice_set_id;
-//  uint8_t version[8];
-
-//  time_t create_time;
-//  time_t update_time;
-
   uint8_t name[32];
-//  uint8_t tag1[8];
-//  uint8_t tag2[8];
-//  uint8_t tag3[8];
-//  uint8_t tag4[8];
   uint8_t comment[256];
 
-  int voice_count;
+  int32_t voice_count;
   VOICE* voices;
 
 } VOICE_SET;
 
 // prototype declarations for VOICE_SET
-int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int32_t format);
-void voice_set_close(VOICE_SET* vs);
+int32_t voice_set_fwrite(VOICE_SET* vs, FILE* fp, int32_t format);
+void voice_set_close(VOICE_SET* vs, int32_t use_high_memory);
 
 #endif

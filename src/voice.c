@@ -3,15 +3,15 @@
 #include "voice.h"
 #include "memory.h"
 
-void voice_set_close(VOICE_SET* vs) {
+void voice_set_close(VOICE_SET* vs, int32_t use_high_memory) {
   if (vs != NULL && vs->voices != NULL) {
-    free_himem(vs->voices, 0);
+    free_himem(vs->voices, use_high_memory);
     vs->voices = NULL;
     vs->voice_count = 0;
   }
 }
 
-int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int32_t format) {
+int32_t voice_set_fwrite(VOICE_SET* vs, FILE* fp, int32_t format) {
 
   int32_t rc = -1;
 

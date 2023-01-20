@@ -2,6 +2,7 @@
 #define __H_MODEL__
 
 #include <stdint.h>
+#include <time.h>
 #include "mdx.h"
 #include "voice.h"
 
@@ -38,7 +39,18 @@ typedef struct {
   int32_t message_index;
   int32_t message_view_size;
 
-  // current drive and directory preservation
+  // current playing mdx
+  int32_t current_mdx_index;
+  time_t current_mdx_start_time;
+
+  // auto play
+  int32_t auto_play_mode;
+  int32_t auto_fadeout_time;
+
+  // high memory
+  int32_t use_high_memory;
+
+  // original current drive and directory preservation
   int32_t original_current_drive;
   uint8_t original_current_dir[ MAX_PATH_LEN ];
 

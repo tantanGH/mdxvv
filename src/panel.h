@@ -65,9 +65,11 @@ void panel_op_waveform_refresh(PANEL* panel, int32_t op);
 void panel_mdx_list_refresh(PANEL* panel);
 void panel_mdx_list_up(PANEL* panel);
 void panel_mdx_list_down(PANEL* panel);
+void panel_mdx_list_jump(PANEL* panel, int32_t mi);
 
 void panel_mdx_play_show_path(PANEL* panel);
 void panel_mdx_play_show_title(PANEL* panel);
+void panel_mdx_play_show_title2(PANEL* panel, const uint8_t* text);
 void panel_mdx_play_prompt(PANEL* panel, int32_t offset, int32_t clear, const uint8_t* text);
 
 void panel_message_show(PANEL* panel, const uint8_t* text);

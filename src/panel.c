@@ -114,8 +114,8 @@ void panel_put_text(PANEL* panel, int32_t x, int32_t y, int32_t color, int32_t b
   SCREEN_HANDLE* scr = (SCREEN_HANDLE*)(panel->scr);
   int32_t len = strlen(text);
   int32_t ofs = 0;
-  for (int i = 0; i < len; i++) {
-    int fx = x + 8*ofs;
+  for (int32_t i = 0; i < len; i++) {
+    int32_t fx = x + 8*ofs;
     if (text[i] == '&') {   // underscore
       panel_xline(panel, fx, y+8, 8, color);
       continue;
@@ -142,17 +142,17 @@ void panel_put_text(PANEL* panel, int32_t x, int32_t y, int32_t color, int32_t b
 
 // put text in 8x8 bold font with centering
 void panel_put_text_center(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text) {
-  int len = strlen(text);
-  int fx = (panel->width - 8 * len)/2;
-  int fy = y;
+  int32_t len = strlen(text);
+  int32_t fx = (panel->width - 8 * len)/2;
+  int32_t fy = y;
   panel_put_text(panel, fx, fy, color, bold, text);
 }
 
 // put text in 8x8 bold font with right alignment
 void panel_put_text_right(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text) {
-  int len = strlen(text);
-  int fx = panel->width - 8 * len;
-  int fy = y;
+  int32_t len = strlen(text);
+  int32_t fx = panel->width - 8 * len;
+  int32_t fy = y;
   panel_put_text(panel, fx, fy, color, bold, text);
 }
 
@@ -162,15 +162,15 @@ void panel_put_text16(PANEL* panel, int32_t x, int32_t y, int32_t color, const u
   if (panel == NULL) return;
 
   SCREEN_HANDLE* scr = (SCREEN_HANDLE*)(panel->scr);
-  int len = strlen(text);
-  int fy = panel->y + y;
+  int32_t len = strlen(text);
+  int32_t fy = panel->y + y;
 
-  for (int i = 0; i < len; i++) {
+  for (int32_t i = 0; i < len; i++) {
 
-    int fx = panel->x + x + 8*i;
+    int32_t fx = panel->x + x + 8*i;
 
     // SJIS code?
-    unsigned short code = text[i];
+    uint16_t code = text[i];
     if (i < len-1 && (text[i] >= 0x81 && text[i] <= 0x9f) || (text[i] >= 0xe0 && text[i] <= 0xfc)) {
       code = text[i] * 256 + text[i+1];
       i++;
@@ -216,10 +216,10 @@ void panel_con_refresh(PANEL* panel) {
 
   VOICE* v = &(vs->voices[ m->voice_index ]);
 
-  int x_ofs2 = 56;
-  int y_ofs1 = 24;
-  int y_ofs2 = 132;
-  int y_step = 16;
+  int32_t x_ofs2 = 56;
+  int32_t y_ofs1 = 24;
+  int32_t y_ofs2 = 132;
+  int32_t y_step = 16;
 
   static char voice_no_str[]    = "    ";
   static char connection_str[]  = "   ";
@@ -235,16 +235,12 @@ void panel_con_refresh(PANEL* panel) {
   panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*2, COLOR_WHITE, FONT_REGULAR, connection_str);
   panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*3, COLOR_WHITE, FONT_REGULAR, feedback_str  );
   panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*4, COLOR_WHITE, FONT_REGULAR, slot_mask_str );
-/*
-  panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*2, COLOR_PURPLE, FONT_REGULAR, connection_str);
-  panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*3, COLOR_PURPLE, FONT_REGULAR, feedback_str  );
-  panel_put_text(panel, x_ofs2,      y_ofs1 + y_step*4, COLOR_PURPLE, FONT_REGULAR, slot_mask_str );
-*/
-  int bar_x1 = 96;
-  int bar_x2 = 132;
 
-  for (int i = 0; i < 3; i++) {
-    int pct;
+  int32_t bar_x1 = 96;
+  int32_t bar_x2 = 132;
+
+  for (int32_t i = 0; i < 3; i++) {
+    int32_t pct;
     switch (i) {
       case  0: pct = (bar_x2 - bar_x1) * v->connection / MAX_CONNECTION; break;
       case  1: pct = (bar_x2 - bar_x1) * v->feedback   / MAX_FEEDBACK;   break;
@@ -256,7 +252,7 @@ void panel_con_refresh(PANEL* panel) {
   }
 
   //panel_con_show_diagram(panel, 0, y_ofs2, COLOR_PURPLE, v->connection);
-  unsigned short* d = NULL;
+  uint16_t* d = NULL;
   switch (v->connection) {
     case 0: d = diagram_con0_data; break;
     case 1: d = diagram_con1_data; break;
@@ -268,9 +264,9 @@ void panel_con_refresh(PANEL* panel) {
     case 7: d = diagram_con7_data; break;
   }
 
-  for (int i = 0; i < DIAGRAM_HEIGHT; i++) {
-    int ofs = ( panel->y + y_ofs2 + i ) * 1024 / 16 + ( panel->x + 0 ) / 16;
-    for (int j = 0; j < DIAGRAM_WIDTH / 16; j++) {
+  for (int32_t i = 0; i < DIAGRAM_HEIGHT; i++) {
+    int32_t ofs = ( panel->y + y_ofs2 + i ) * 1024 / 16 + ( panel->x + 0 ) / 16;
+    for (int32_t j = 0; j < DIAGRAM_WIDTH / 16; j++) {
       TVRAM_PAGE0[ ofs++ ] = *d++;
     }
   }
@@ -367,9 +363,9 @@ void panel_op_refresh(PANEL* panel, int32_t op) {
       goto exit;
   }
 
-  int x_ofs2 = 56;
-  int y_ofs1 = 24;
-  int y_step = 16;
+  int32_t x_ofs2 = 56;
+  int32_t y_ofs1 = 24;
+  int32_t y_step = 16;
 
   static char attack_rate_str[]  = "   ";
   static char decay_rate1_str[]  = "   ";
@@ -407,24 +403,11 @@ void panel_op_refresh(PANEL* panel, int32_t op) {
   panel_put_text(panel, x_ofs2, y_ofs1 + y_step*9,  COLOR_WHITE, FONT_REGULAR, detune2_str     );
   panel_put_text(panel, x_ofs2, y_ofs1 + y_step*10, COLOR_WHITE, FONT_REGULAR, ams_enable_str  );      
 
-/*
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*0,  COLOR_PURPLE, FONT_REGULAR, attack_rate_str );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*1,  COLOR_PURPLE, FONT_REGULAR, decay_rate1_str );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*2,  COLOR_PURPLE, FONT_REGULAR, decay_rate2_str );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*3,  COLOR_PURPLE, FONT_REGULAR, release_rate_str); 
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*4,  COLOR_PURPLE, FONT_REGULAR, decay_level1_str);
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*5,  COLOR_PURPLE, FONT_REGULAR, total_level_str );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*6,  COLOR_PURPLE, FONT_REGULAR, key_scaling_str );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*7,  COLOR_PURPLE, FONT_REGULAR, phase_multi_str ); 
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*8,  COLOR_PURPLE, FONT_REGULAR, detune1_str     ); 
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*9,  COLOR_PURPLE, FONT_REGULAR, detune2_str     );
-  panel_put_text(panel, x_ofs2, y_ofs1 + y_step*10, COLOR_PURPLE, FONT_REGULAR, ams_enable_str  );        
-*/
-  int bar_x1 = 96;
-  int bar_x2 = 132;
+  int32_t bar_x1 = 96;
+  int32_t bar_x2 = 132;
 
-  for (int i = 0; i < 11; i++) {
-    int pct;
+  for (int32_t i = 0; i < 11; i++) {
+    int32_t pct;
     switch (i) {
       case  0: pct = (bar_x2 - bar_x1) * attack_rate  / MAX_ATTACK_RATE;  break;
       case  1: pct = (bar_x2 - bar_x1) * decay_rate1  / MAX_DECAY_RATE1;  break;
@@ -460,31 +443,31 @@ void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
 
     if (adsr != NULL) {
 
-      static unsigned short frame_buffer[ 40 ][ ADSR_WIDTH/16 + 1 ];
-      for (int i = 0; i < 40; i++) {
-        for (int j = 0; j < ADSR_WIDTH/16 + 1; j++) {
+      static uint16_t frame_buffer[ 40 ][ ADSR_WIDTH/16 + 1 ];
+      for (int32_t i = 0; i < 40; i++) {
+        for (int32_t j = 0; j < ADSR_WIDTH/16 + 1; j++) {
           frame_buffer[i][j] = 0;
         }
       }
 
-      int x0 = panel->x + 20;
-      int x0a = x0 >> 4;
+      int32_t x0 = panel->x + 20;
+      int32_t x0a = x0 >> 4;
 
-      for (int i = 0; i < ADSR_WIDTH - 1; i++) {
+      for (int32_t i = 0; i < ADSR_WIDTH - 1; i++) {
 
-        int x1 = panel->x + 20 + i;
-        int x1a = x1 >> 4;
-        unsigned short x1b = 0x8000 >> (x1 % 16);
+        int32_t x1 = panel->x + 20 + i;
+        int32_t x1a = x1 >> 4;
+        uint16_t x1b = 0x8000 >> (x1 % 16);
 
-        int y1 = 40 * ( 1.0 - adsr[i]   );
-        int y2 = 40 * ( 1.0 - adsr[i+1] );
+        int32_t y1 = 40 * ( 1.0 - adsr[i]   );
+        int32_t y2 = 40 * ( 1.0 - adsr[i+1] );
 
         if (y1 > y2) {
-          for (int y = y1; y > y2; y--) {
+          for (int32_t y = y1; y > y2; y--) {
             frame_buffer[ y ][ x1a - x0a ] |= x1b;
           }
         } else if (y1 < y2) {
-          for (int y = y1; y < y2; y++) {
+          for (int32_t y = y1; y < y2; y++) {
             frame_buffer[ y ][ x1a - x0a ] |= x1b;
           }
         } else {
@@ -493,10 +476,12 @@ void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
 
       }
 
-      for (int i = 0; i < 40; i++) {
-        for (int j = 0; j < ADSR_WIDTH/16 + 1; j++) {
-          int x1 = panel->x + 20 + j * 16;
-          int x1a = x1 >> 4;
+      WAIT_VBLANK;
+
+      for (int32_t i = 0; i < 40; i++) {
+        for (int32_t j = 0; j < ADSR_WIDTH/16 + 1; j++) {
+          int32_t x1 = panel->x + 20 + j * 16;
+          int32_t x1a = x1 >> 4;
           TVRAM_PAGE0[ ( panel->y + 11 + i ) * 1024/16 + x1a ] = frame_buffer[i][j];
         }
       }
@@ -506,18 +491,18 @@ void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
 /*
     panel_clear(panel, 20, 11, ADSR_WIDTH, 40, COLOR_WHITE);
     if (adsr != NULL) {
-      for (int i = 0; i < ADSR_WIDTH - 1; i++) {
-        int x0 = panel->x + 20 + i;
-        int y0 = panel->y + 11 + 40 * ( 1.0 - adsr[i]   );
-        int y1 = panel->y + 11 + 40 * ( 1.0 - adsr[i+1] );
-        int x0a = x0 >> 4;
-        unsigned short x0b = 0x8000 >> (x0 % 16);
+      for (int32_t i = 0; i < ADSR_WIDTH - 1; i++) {
+        int32_t x0 = panel->x + 20 + i;
+        int32_t y0 = panel->y + 11 + 40 * ( 1.0 - adsr[i]   );
+        int32_t y1 = panel->y + 11 + 40 * ( 1.0 - adsr[i+1] );
+        int32_t x0a = x0 >> 4;
+        uint16_t x0b = 0x8000 >> (x0 % 16);
         if (y0 > y1) {
-          for (int y = y0; y > y1; y--) {
+          for (int32_t y = y0; y > y1; y--) {
             TVRAM_PAGE0[ y * 64 + x0a ] |= x0b;
           }
         } else if (y0 < y1) {
-          for (int y = y0; y < y1; y++) {
+          for (int32_t y = y0; y < y1; y++) {
             TVRAM_PAGE0[ y * 64 + x0a ] |= x0b;
           }
         } else {
@@ -663,7 +648,7 @@ void panel_mdx_list_refresh(PANEL* panel) {
   }
 
   // list MDX files
-  for (int i = 0; i < mdx_list->mdx_count && yofs < m->list_view_size; i++) {
+  for (int32_t i = 0; i < mdx_list->mdx_count && yofs < m->list_view_size; i++) {
     static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     int32_t mi = i ;
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
@@ -791,7 +776,7 @@ void panel_mdx_list_down(PANEL* panel) {
     // new line is a sub dir? or a MDX?
     if (m->list_view_index + m->list_view_size - 1 < mdx_list->sub_dir_count) {
       // sub dir
-      int si = m->list_view_index + m->list_view_size -1;
+      int32_t si = m->list_view_index + m->list_view_size -1;
       panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
       panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     } else {
@@ -806,6 +791,101 @@ void panel_mdx_list_down(PANEL* panel) {
     // new cursor bar
     panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
   }
+}
+
+// jump cursor bar to the specific position in the list panel
+void panel_mdx_list_jump(PANEL* panel, int32_t index) {
+
+  if (panel == NULL) goto exit;
+
+  MODEL* m = panel->model;
+  MDX_LIST* mdx_list = m->mdx_list;
+
+  int32_t sc = mdx_list->sub_dir_count;
+  int32_t mc = mdx_list->mdx_count;
+
+  if (mdx_list == NULL || (sc + mc) == 0 || (sc + mc) <= index) goto exit;
+
+  if ((sc + mc) <= m->list_view_size) {
+    m->list_view_index = 0;
+    m->list_index = index;
+    panel_mdx_list_refresh(panel);
+    goto exit;
+  }
+
+  if (index < m->list_view_size) {
+    m->list_view_index = 0;
+    m->list_index = index;
+    panel_mdx_list_refresh(panel);
+    goto exit;
+  }
+
+  if (index >= (sc + mc - m->list_view_size)) {
+    m->list_view_index = sc + mc - m->list_view_size;
+    m->list_index = index - (sc + mc - m->list_view_size);
+    panel_mdx_list_refresh(panel);
+    goto exit;
+  }
+
+/*
+  WAIT_VSYNC;
+  WAIT_VBLANK;
+
+  if (m->list_index < m->list_view_size-1) {
+
+    if (m->list_index + 1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
+      // just move cursor down
+      panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
+      panel_xline(panel, 4, 16 * (m->list_index + 1) + 15, 760, COLOR_WHITE);
+      m->list_index++;
+    }
+
+  } else if (m->list_view_index +1 + m->list_view_size -1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
+
+    // we are at the end of list, scrolling up
+    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
+    for (int32_t i = 0; i < 16 * (m->list_view_size - 1); i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
+        TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
+         = TVRAM_PAGE0[ ( panel->y + i + 16 ) * 1024 / 16 + panel->x / 16 + j ];
+        TVRAM_PAGE1[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
+         = TVRAM_PAGE1[ ( panel->y + i + 16 ) * 1024 / 16 + panel->x / 16 + j ];
+      }
+    }
+
+    // erase the bottom line
+    for (int32_t i = 0; i < 16; i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
+        TVRAM_PAGE0[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
+        TVRAM_PAGE1[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
+      }
+    }
+
+    // increment scroll window poition here
+    m->list_view_index++;
+
+    // new line is a sub dir? or a MDX?
+    if (m->list_view_index + m->list_view_size - 1 < mdx_list->sub_dir_count) {
+      // sub dir
+      int32_t si = m->list_view_index + m->list_view_size -1;
+      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
+      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
+    } else {
+      // MDX
+      static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
+      int32_t mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
+      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
+      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
+      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
+    }
+
+    // new cursor bar
+    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
+  }
+
+*/
+exit:
+
 }
 
 // show mdx list path
@@ -829,6 +909,15 @@ void panel_mdx_play_show_title(PANEL* panel) {
       int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
       panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi, m->list_sort_order));
     }
+  }
+}
+
+// show mdx data title 2
+void panel_mdx_play_show_title2(PANEL* panel, const uint8_t* text) {
+  if (panel != NULL && text != NULL) {
+    WAIT_VBLANK;
+    panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
+    panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, text);
   }
 }
 
