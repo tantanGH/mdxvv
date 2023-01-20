@@ -527,13 +527,13 @@ static void play_mdx(SCREEN_HANDLE* scr, MODEL* m, int32_t mi, int32_t scan_code
   panel_message_show(panel_message, cmd);
   sprintf(cmd, "%s -p %s >NUL", MXP_EXEC, mdx_full_path_name);  // for system exec
   if (system(cmd) != 0) {
-    panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
     m->current_mdx_index = mi;
     m->current_mdx_start_time = 0;
+    panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
   } else {
-    panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
     m->current_mdx_index = mi;
     m->current_mdx_start_time = time(NULL);
+    panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
   }
 
   // move cursor before loading MDX (takes time)
@@ -715,6 +715,14 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
 
       int32_t scan_code = B_KEYINP() >> 8;
 
+      int32_t shift_sense = B_SFTSNS();
+      if (shift_sense & 0x01) {
+        scan_code += 0x100;
+      }
+      if (shift_sense & 0x02) {
+        scan_code += 0x200;
+      }
+
       switch (scan_code) {
 
         case KEY_SCAN_CODE_ESC:
@@ -723,24 +731,18 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           goto quit;
 
         case KEY_SCAN_CODE_UP:
-        case KEY_SCAN_CODE_K: {
+        case KEY_SCAN_CODE_K:
+        case KEY_SCAN_CODE_CTRL_P: {
           // cursor up
           panel_mdx_list_up(panel_mdx_list);
           break;
         }
 
         case KEY_SCAN_CODE_DOWN:
-        case KEY_SCAN_CODE_J: {
+        case KEY_SCAN_CODE_J:
+        case KEY_SCAN_CODE_CTRL_N: {
           // cursor down
           panel_mdx_list_down(panel_mdx_list);
-          break;
-        }
-
-        case KEY_SCAN_CODE_N: {
-          if (B_SFTSNS() & 0x02) {
-            // cursor down
-            panel_mdx_list_down(panel_mdx_list);
-          }
           break;
         }
 
@@ -789,7 +791,8 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
         case KEY_SCAN_CODE_CR:
         case KEY_SCAN_CODE_ENTER:
         case KEY_SCAN_CODE_SPACE:
-        case KEY_SCAN_CODE_BS: {
+        case KEY_SCAN_CODE_BS:
+        case KEY_SCAN_CODE_CTRL_M: {
 
           // select and play MDX, or enter a sub directory
           if (m->mdx_list != NULL 
@@ -872,38 +875,35 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           break;
         }
 
-        case KEY_SCAN_CODE_COMMA: {
-          if (B_SFTSNS() & 0x01) {
-            // '<' jump to list top
-            panel_mdx_list_jump(panel_mdx_list, 0);
-          }
+        case KEY_SCAN_CODE_HOME:
+        case KEY_SCAN_CODE_SHIFT_COMMA: {
+          // '<' jump to list top
+          panel_mdx_list_jump(panel_mdx_list, 0);
           break;
         }
 
+        case KEY_SCAN_CODE_SHIFT_PERIOD: {  
+          // '>' jump to list end
+          panel_mdx_list_jump(panel_mdx_list, m->mdx_list->sub_dir_count + m->mdx_list->mdx_count - 1);
+          break;
+        }
+        
         case KEY_SCAN_CODE_PERIOD: {
-          if (B_SFTSNS() & 0x01) {
-            // '>' jump to list end
-            panel_mdx_list_jump(panel_mdx_list, m->mdx_list->sub_dir_count + m->mdx_list->mdx_count - 1);
-          } else {
+          // '.' move to parent directory (if exists)
+          if (strcmp(m->mdx_list->sub_dir_names + 0, "..") == 0) {
 
-            // '.' move to parent directory (if exists)
-            if (strcmp(m->mdx_list->sub_dir_names + 0, "..") == 0) {
+            // full sub directory path name
+            static uint8_t new_mdx_dir[ MAX_PATH_LEN ];
+            strcpy(new_mdx_dir, m->mdx_list->path_name);
+            strcat(new_mdx_dir, "..");
 
-              // full sub directory path name
-              static uint8_t new_mdx_dir[ MAX_PATH_LEN ];
-              strcpy(new_mdx_dir, m->mdx_list->path_name);
-              strcat(new_mdx_dir, "..");
-
-              // refresh
-              update_mdx_list(scr, m, new_mdx_dir);
-            }
-
+            // refresh
+            update_mdx_list(scr, m, new_mdx_dir);
           }
           break;
         }
 
         case KEY_SCAN_CODE_YEN: {
-
           // '\' move to root directory
           static uint8_t new_mdx_dir[ MAX_PATH_LEN ];
           sprintf(new_mdx_dir, "%c:\\", m->mdx_list->path_name[0]);
@@ -947,15 +947,10 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
         }
 
         case KEY_SCAN_CODE_P: {
-          if (B_SFTSNS() & 0x02) {
-            // cursor up
-            panel_mdx_list_up(panel_mdx_list);
-          } else {
-            // play MDX
-            mxdrv_m_play();
-            panel_message_show(panel_message, "Played.");
-            m->current_mdx_start_time = time(NULL);
-          }
+          // play MDX
+          mxdrv_m_play();
+          panel_message_show(panel_message, "Played.");
+          m->current_mdx_start_time = time(NULL);
           break;
         }
 
@@ -964,6 +959,35 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           mxdrv_m_fadeout(20);
           panel_message_show(panel_message, "Fadeout.");
           m->current_mdx_start_time = 0;
+          break;
+        }
+
+        case KEY_SCAN_CODE_ROLLUP:
+        case KEY_SCAN_CODE_CTRL_F: { 
+          // page forward
+          int32_t lvi = m->list_view_index + m->list_view_size;
+          if (lvi > (m->mdx_list->sub_dir_count + m->mdx_list->mdx_count - m->list_view_size)) {
+            m->list_view_index = m->mdx_list->sub_dir_count + m->mdx_list->mdx_count - m->list_view_size;
+            m->list_index = m->list_view_size - 1;
+          } else {
+            m->list_view_index = lvi;
+          }
+          panel_mdx_list_refresh(panel_mdx_list);
+          break;
+        }
+
+        case KEY_SCAN_CODE_ROLLDOWN:
+        case KEY_SCAN_CODE_B:
+        case KEY_SCAN_CODE_CTRL_B: {
+          // page backward
+          int32_t lvi = m->list_view_index - m->list_view_size;
+          if (lvi < 0) {
+            m->list_view_index = 0;
+            m->list_index = 0;
+          } else {
+            m->list_view_index = lvi;
+          }
+          panel_mdx_list_refresh(panel_mdx_list);
           break;
         }
 
@@ -979,39 +1003,37 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           break;
         }
 
-        case KEY_SCAN_CODE_M: {
-          if (B_SFTSNS() & 0x01) {
-            // 'M' execute external MMMDSP.r to play the selected MDX
+        case KEY_SCAN_CODE_SHIFT_M: {
+          // 'M' execute external MMMDSP.r to play the selected MDX
 
-            // selected MDX file
-            static uint8_t mdx_full_path_name[ MAX_PATH_LEN ];
+          // selected MDX file
+          static uint8_t mdx_full_path_name[ MAX_PATH_LEN ];
 
-            // selected MDX index
-            int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
+          // selected MDX index
+          int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
 
-            // full MDX path name
-            strcpy(mdx_full_path_name, m->mdx_list->path_name);
-            strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi, m->list_sort_order));
+          // full MDX path name
+          strcpy(mdx_full_path_name, m->mdx_list->path_name);
+          strcat(mdx_full_path_name, mdx_list_get_sorted_file_name(m->mdx_list, mi, m->list_sort_order));
 
-            // execute MMDSP
-            static uint8_t cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
-            sprintf(cmd, "%s %s", MMDSP_EXEC, mdx_full_path_name);   // for message
-            panel_message_show(panel_message, cmd);
-            sprintf(cmd, "%s %s >NUL", MMDSP_EXEC, mdx_full_path_name);  // for system exec
-            if (system(cmd) != 0) {
-              panel_message_show(panel_message, "!!! " MMDSP_EXEC " execution failure.");
-            } else {
-              // recreate full view
-              C_FNKMOD(3);
-              C_CUROFF();
-              m->list_index = 0;
-              m->list_view_index = 0;
-              m->message_index = 0;
-              create_view(scr, m);
-              panel_mdx_play_show_path(panel_mdx_play);
-              panel_mdx_list_refresh(panel_mdx_list);
-              //panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
-            }
+          // execute MMDSP
+          static uint8_t cmd[ MDX_MAX_PATH_NAME_LEN + 32 ];
+          sprintf(cmd, "%s %s", MMDSP_EXEC, mdx_full_path_name);   // for message
+          panel_message_show(panel_message, cmd);
+          sprintf(cmd, "%s %s >NUL", MMDSP_EXEC, mdx_full_path_name);  // for system exec
+          if (system(cmd) != 0) {
+            panel_message_show(panel_message, "!!! " MMDSP_EXEC " execution failure.");
+          } else {
+            // recreate full view
+            C_FNKMOD(3);
+            C_CUROFF();
+            m->list_index = 0;
+            m->list_view_index = 0;
+            m->message_index = 0;
+            create_view(scr, m);
+            panel_mdx_play_show_path(panel_mdx_play);
+            panel_mdx_list_refresh(panel_mdx_list);
+            //panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
           }
           break;
         }
@@ -1057,10 +1079,6 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           mi = 0;
         }
         play_mdx(scr, m, mi, -1);
-        uint8_t* mml_name = mxdrv_mml_name();
-        if (mml_name != NULL) {
-          panel_mdx_play_show_title2(panel_mdx_play, mml_name);
-        }
       }
     }
   }

@@ -502,7 +502,7 @@ uint8_t* mdx_list_get_sorted_sub_dir_name(MDX_LIST* mdx_list, int32_t si, int32_
   uint8_t* p;
   if (mdx_list != NULL) {
     // ".." must be the top always
-    int32_t si_sorted = (si == 0) ? 0 : (order == 0) ? mdx_list->sub_dir_sort_indexes[ si ] : mdx_list->sub_dir_sort_indexes[ mdx_list->sub_dir_count - 1 - si ];
+    int32_t si_sorted = (si == 0) ? 0 : (order == 0) ? mdx_list->sub_dir_sort_indexes[ si ] : mdx_list->sub_dir_sort_indexes[ mdx_list->sub_dir_count - si ];
     p = mdx_list->sub_dir_names + MDX_MAX_FILE_NAME_LEN * si_sorted;
   }
   return p;

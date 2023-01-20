@@ -637,20 +637,28 @@ void panel_mdx_list_refresh(PANEL* panel) {
   MDX_LIST* mdx_list = m->mdx_list;
   int32_t yofs = 0;
 
-  panel_clear(panel, 2, 0, 764, 16*m->list_view_size, COLOR_WHITE | COLOR_DARK_PURPLE);
+  int32_t li = m->list_index;
+  int32_t lvi = m->list_view_index;
+  int32_t lvs = m->list_view_size;
+
+  int32_t sc = mdx_list->sub_dir_count;
+  int32_t mc = mdx_list->mdx_count;
+
+  panel_clear(panel, 2, 0, 764, 16*lvs, COLOR_WHITE | COLOR_DARK_PURPLE);
 
   // list sub directories first
-  for (int32_t i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
-    int32_t si = i ;
+  for (int32_t i = lvi; i < sc && yofs < lvs; i++) {
+    int32_t si = i;
     panel_put_text(panel, 2, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     yofs++;
   }
 
   // list MDX files
-  for (int32_t i = 0; i < mdx_list->mdx_count && yofs < m->list_view_size; i++) {
+  int32_t lofs = (lvi >= sc) ? lvi - sc : 0;
+  for (int32_t i = lofs; i < mc && yofs < lvs; i++) {
     static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
-    int32_t mi = i ;
+    int32_t mi = i;
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
     panel_put_text(panel, 2, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
@@ -658,8 +666,8 @@ void panel_mdx_list_refresh(PANEL* panel) {
   }
 
   // cursor bar
-  if (mdx_list->sub_dir_count + mdx_list->mdx_count > 0) {
-    panel_xline(panel, 2, 16 * m->list_index + 15, 764, COLOR_WHITE);
+  if ((sc + mc) > 0) {
+    panel_xline(panel, 2, 16 * li + 15, 764, COLOR_WHITE);
   }
 }
 
@@ -827,63 +835,6 @@ void panel_mdx_list_jump(PANEL* panel, int32_t index) {
     goto exit;
   }
 
-/*
-  WAIT_VSYNC;
-  WAIT_VBLANK;
-
-  if (m->list_index < m->list_view_size-1) {
-
-    if (m->list_index + 1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
-      // just move cursor down
-      panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
-      panel_xline(panel, 4, 16 * (m->list_index + 1) + 15, 760, COLOR_WHITE);
-      m->list_index++;
-    }
-
-  } else if (m->list_view_index +1 + m->list_view_size -1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
-
-    // we are at the end of list, scrolling up
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
-    for (int32_t i = 0; i < 16 * (m->list_view_size - 1); i++) {
-      for (int32_t j = 0; j < panel->width / 16; j++) {
-        TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
-         = TVRAM_PAGE0[ ( panel->y + i + 16 ) * 1024 / 16 + panel->x / 16 + j ];
-        TVRAM_PAGE1[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
-         = TVRAM_PAGE1[ ( panel->y + i + 16 ) * 1024 / 16 + panel->x / 16 + j ];
-      }
-    }
-
-    // erase the bottom line
-    for (int32_t i = 0; i < 16; i++) {
-      for (int32_t j = 0; j < panel->width / 16; j++) {
-        TVRAM_PAGE0[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
-        TVRAM_PAGE1[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
-      }
-    }
-
-    // increment scroll window poition here
-    m->list_view_index++;
-
-    // new line is a sub dir? or a MDX?
-    if (m->list_view_index + m->list_view_size - 1 < mdx_list->sub_dir_count) {
-      // sub dir
-      int32_t si = m->list_view_index + m->list_view_size -1;
-      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
-      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
-    } else {
-      // MDX
-      static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
-      int32_t mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
-      trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
-      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
-      panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
-    }
-
-    // new cursor bar
-    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
-  }
-
-*/
 exit:
 
 }
@@ -906,7 +857,8 @@ void panel_mdx_play_show_title(PANEL* panel) {
     WAIT_VBLANK;
     panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
     if ((m->mdx_list->sub_dir_count + m->mdx_list->mdx_count) > 0) {
-      int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
+      //int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
+      int32_t mi = m->current_mdx_index;
       panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi, m->list_sort_order));
     }
   }
