@@ -626,9 +626,6 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   // graphic preservation
   int32_t preserve_graphic = 0;
 
-  // expand heap size
-  allmem();
-
   // create MVC model instance
   static MODEL model = { 0 };
   MODEL* m = &model;
@@ -678,6 +675,14 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   PANEL* panel_message = screen_get_panel(scr, PANEL_MESSAGE);
   panel_message_show(panel_message, "MDXVV.X v" VERSION);
   panel_message_show(panel_message, "Completed initialization successfully.");
+  if (m->auto_play_mode) {
+    panel_message_show(panel_message, "Auto play mode on.");
+  } else {
+    panel_message_show(panel_message, "Auto play mode off."); 
+  }
+  if (m->use_high_memory) {
+    panel_message_show(panel_message, "Use high memory for buffers.");
+  }
 
   // display panel shortcuts
   PANEL* panel_mdx_play = screen_get_panel(scr, PANEL_MDX_PLAY);  
@@ -717,15 +722,25 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           // quit mdxvv
           goto quit;
 
-        case KEY_SCAN_CODE_UP: {
+        case KEY_SCAN_CODE_UP:
+        case KEY_SCAN_CODE_K: {
           // cursor up
           panel_mdx_list_up(panel_mdx_list);
           break;
         }
 
-        case KEY_SCAN_CODE_DOWN: {
+        case KEY_SCAN_CODE_DOWN:
+        case KEY_SCAN_CODE_J: {
           // cursor down
           panel_mdx_list_down(panel_mdx_list);
+          break;
+        }
+
+        case KEY_SCAN_CODE_N: {
+          if (B_SFTSNS() & 0x02) {
+            // cursor down
+            panel_mdx_list_down(panel_mdx_list);
+          }
           break;
         }
 
@@ -932,10 +947,15 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
         }
 
         case KEY_SCAN_CODE_P: {
-          // play MDX
-          mxdrv_m_play();
-          panel_message_show(panel_message, "Played.");
-          m->current_mdx_start_time = time(NULL);
+          if (B_SFTSNS() & 0x02) {
+            // cursor up
+            panel_mdx_list_up(panel_mdx_list);
+          } else {
+            // play MDX
+            mxdrv_m_play();
+            panel_message_show(panel_message, "Played.");
+            m->current_mdx_start_time = time(NULL);
+          }
           break;
         }
 

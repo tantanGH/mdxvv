@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <doslib.h>
 #include <iocslib.h>
 
 #include "memory.h"
@@ -39,15 +40,15 @@ inline static void __free_himem(void* ptr) {
 //  main memory operations using DOSCALL (with malloc, we cannot allocate more than 64k, why?)
 //
 inline static void* __malloc_mainmem(size_t size) {
-  return malloc(size);
-//  uint32_t addr = MALLOC(size);
-//  return (addr >= 0x81000000) ? NULL : (void*)addr;
+//  return malloc(size);
+  uint32_t addr = MALLOC(size);
+  return (addr >= 0x81000000) ? NULL : (void*)addr;
 }
 
 inline static void __free_mainmem(void* ptr) {
   if (ptr == NULL) return;
-  free(ptr);
-  //MFREE((int)ptr);
+//  free(ptr);
+  MFREE((int)ptr);
 }
 
 //

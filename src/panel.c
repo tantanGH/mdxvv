@@ -221,10 +221,10 @@ void panel_con_refresh(PANEL* panel) {
   int32_t y_ofs2 = 132;
   int32_t y_step = 16;
 
-  static char voice_no_str[]    = "    ";
-  static char connection_str[]  = "   ";
-  static char feedback_str[]    = "   ";
-  static char slot_mask_str[]   = "   ";
+  static uint8_t voice_no_str[]    = "    ";
+  static uint8_t connection_str[]  = "   ";
+  static uint8_t feedback_str[]    = "   ";
+  static uint8_t slot_mask_str[]   = "   ";
 
   sprintf(voice_no_str,   "@%d   ", v->voice_id  );
   sprintf(connection_str, "%3d",    v->connection);
@@ -367,17 +367,17 @@ void panel_op_refresh(PANEL* panel, int32_t op) {
   int32_t y_ofs1 = 24;
   int32_t y_step = 16;
 
-  static char attack_rate_str[]  = "   ";
-  static char decay_rate1_str[]  = "   ";
-  static char decay_rate2_str[]  = "   ";
-  static char release_rate_str[] = "   ";
-  static char decay_level1_str[] = "   ";
-  static char total_level_str[]  = "   ";
-  static char key_scaling_str[]  = "   ";
-  static char phase_multi_str[]  = "   ";
-  static char detune1_str[]      = "   ";
-  static char detune2_str[]      = "   ";
-  static char ams_enable_str[]   = "   ";
+  static uint8_t attack_rate_str[]  = "   ";
+  static uint8_t decay_rate1_str[]  = "   ";
+  static uint8_t decay_rate2_str[]  = "   ";
+  static uint8_t release_rate_str[] = "   ";
+  static uint8_t decay_level1_str[] = "   ";
+  static uint8_t total_level_str[]  = "   ";
+  static uint8_t key_scaling_str[]  = "   ";
+  static uint8_t phase_multi_str[]  = "   ";
+  static uint8_t detune1_str[]      = "   ";
+  static uint8_t detune2_str[]      = "   ";
+  static uint8_t ams_enable_str[]   = "   ";
 
   sprintf(attack_rate_str,  "%3d", attack_rate);
   sprintf(decay_rate1_str,  "%3d", decay_rate1);
@@ -605,11 +605,11 @@ void panel_message_show(PANEL* panel, const uint8_t* message) {
   }
 
   time_t tm = time(NULL);
-  static char line[128];
+  static uint8_t line[ MAX_MES_LEN ];
   strftime(line, 128, "[%Y-%m-%d %H:%M:%S] ", localtime(&tm));
   strcat(line, message);
   
-  panel_put_text(panel, 4, 4 + 10 * m->message_index, COLOR_DARK_PURPLE, FONT_REGULAR, line);
+  panel_put_text(panel, 0, 4 + 10 * m->message_index, COLOR_DARK_PURPLE, FONT_REGULAR, line);
   m->message_index++;
 }
 
@@ -637,12 +637,12 @@ void panel_mdx_list_refresh(PANEL* panel) {
   MDX_LIST* mdx_list = m->mdx_list;
   int32_t yofs = 0;
 
-  panel_clear(panel, 4, 0, 760, 16*m->list_view_size, COLOR_WHITE | COLOR_DARK_PURPLE);
+  panel_clear(panel, 2, 0, 764, 16*m->list_view_size, COLOR_WHITE | COLOR_DARK_PURPLE);
 
   // list sub directories first
   for (int32_t i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
     int32_t si = i ;
-    panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
+    panel_put_text(panel, 2, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     yofs++;
   }
@@ -652,14 +652,14 @@ void panel_mdx_list_refresh(PANEL* panel) {
     static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     int32_t mi = i ;
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
-    panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
+    panel_put_text(panel, 2, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     yofs++;
   }
 
   // cursor bar
   if (mdx_list->sub_dir_count + mdx_list->mdx_count > 0) {
-    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
+    panel_xline(panel, 2, 16 * m->list_index + 15, 764, COLOR_WHITE);
   }
 }
 
@@ -679,14 +679,14 @@ void panel_mdx_list_up(PANEL* panel) {
   if (m->list_index > 0) {
 
     // just move cursor up
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);    // erase cursor
+    panel_clear(panel, 2, 16 * m->list_index + 15, 764, 1, COLOR_WHITE);    // erase cursor
     m->list_index--;
-    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
+    panel_xline(panel, 2, 16 * m->list_index + 15, 764, COLOR_WHITE);
 
   } else if (m->list_view_index > 0) {
 
     // we are already at the top of the list, scrolling down
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);    // erase cursor
+    panel_clear(panel, 2, 16 * m->list_index + 15, 764, 1, COLOR_WHITE);    // erase cursor
     for (int32_t i = 16 * m->list_view_size - 1; i >= 16; i--) {
       for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -711,19 +711,19 @@ void panel_mdx_list_up(PANEL* panel) {
     if (m->list_view_index < mdx_list->sub_dir_count) {
       // sub dir
       int32_t si = m->list_view_index;
-      panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
+      panel_put_text(panel, 2, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
       panel_put_text16(panel, 4 + 8*16, 0, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     } else {
       // MDX
       static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
       int32_t mi = m->list_view_index - mdx_list->sub_dir_count;
       trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
-      panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
+      panel_put_text(panel, 2, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
       panel_put_text16(panel, 4 + 8*16, 0, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     }
 
     // new cursor bar
-    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
+    panel_xline(panel, 2, 16 * m->list_index + 15, 764, COLOR_WHITE);
   }
 }
 
@@ -744,15 +744,15 @@ void panel_mdx_list_down(PANEL* panel) {
 
     if (m->list_index + 1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
       // just move cursor down
-      panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
-      panel_xline(panel, 4, 16 * (m->list_index + 1) + 15, 760, COLOR_WHITE);
+      panel_clear(panel, 2, 16 * m->list_index + 15, 764, 1, COLOR_WHITE);   // erase cursor
+      panel_xline(panel, 2, 16 * (m->list_index + 1) + 15, 764, COLOR_WHITE);
       m->list_index++;
     }
 
   } else if (m->list_view_index +1 + m->list_view_size -1 < mdx_list->sub_dir_count + mdx_list->mdx_count) {
 
     // we are at the end of list, scrolling up
-    panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
+    panel_clear(panel, 2, 16 * m->list_index + 15, 764, 1, COLOR_WHITE);   // erase cursor
     for (int32_t i = 0; i < 16 * (m->list_view_size - 1); i++) {
       for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -777,19 +777,19 @@ void panel_mdx_list_down(PANEL* panel) {
     if (m->list_view_index + m->list_view_size - 1 < mdx_list->sub_dir_count) {
       // sub dir
       int32_t si = m->list_view_index + m->list_view_size -1;
-      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
+      panel_put_text(panel, 2, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
       panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     } else {
       // MDX
       static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
       int32_t mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
       trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
-      panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
+      panel_put_text(panel, 2, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
       panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
     }
 
     // new cursor bar
-    panel_xline(panel, 4, 16 * m->list_index + 15, 760, COLOR_WHITE);
+    panel_xline(panel, 2, 16 * m->list_index + 15, 764, COLOR_WHITE);
   }
 }
 
@@ -894,8 +894,8 @@ void panel_mdx_play_show_path(PANEL* panel) {
     WAIT_VBLANK;
     static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, panel->model->mdx_list->path_name);
-    panel_clear(panel, 4, 10, 8*16, 7, COLOR_DARK_PURPLE);
-    panel_put_text(panel, 4, 10, COLOR_DARK_PURPLE, FONT_BOLD, trimmed_file_name);
+    panel_clear(panel, 2, 10, 8*16, 7, COLOR_DARK_PURPLE);
+    panel_put_text(panel, 2, 10, COLOR_DARK_PURPLE, FONT_BOLD, trimmed_file_name);
   }
 }
 
