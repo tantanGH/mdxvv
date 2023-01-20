@@ -459,8 +459,8 @@ void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
         int32_t x1a = x1 >> 4;
         uint16_t x1b = 0x8000 >> (x1 % 16);
 
-        int32_t y1 = 40 * ( 1.0 - adsr[i]   );
-        int32_t y2 = 40 * ( 1.0 - adsr[i+1] );
+        int32_t y1 = 40.0 * ( 1.0 - adsr[i]   );
+        int32_t y2 = 40.0 * ( 1.0 - adsr[i+1] );
 
         if (y1 > y2) {
           for (int32_t y = y1; y > y2; y--) {
@@ -516,60 +516,68 @@ void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
 
 // refresh operator waveform panel with the latest model content
 void panel_op_waveform_refresh(PANEL* panel, int32_t op) {
+  if (panel != NULL) {  
+    MODEL* m = panel->model;
+    float* wave = NULL;
+    switch (op) {
+      case 0: wave = m->wave_total; break;
+      case 1: wave = m->wave_m1; break;
+      case 2: wave = m->wave_c1; break;
+      case 3: wave = m->wave_m2; break;
+      case 4: wave = m->wave_c2; break;
+    }
 
-  if (panel == NULL) goto exit;
-  
-  MODEL* m = panel->model;
-  VOICE_SET* vs = m->voice_set;
+    if (wave != NULL) {
 
-  if (vs == NULL) {
-    panel_clear(panel, 56, 24, panel->width - 60, panel->height - 28, COLOR_PURPLE);
-    goto exit;
-  }
+      static uint16_t frame_buffer[ 40 ][ ADSR_WIDTH/16 + 1 ];
+      for (int32_t i = 0; i < 40; i++) {
+        for (int32_t j = 0; j < ADSR_WIDTH/16 + 1; j++) {
+          frame_buffer[i][j] = 0;
+        }
+      }
 
-  VOICE* v = &(vs->voices[ m->voice_index ]);
+      int32_t x0 = panel->x + 20;
+      int32_t x0a = x0 >> 4;
 
-  uint8_t key_scaling;
-  uint8_t phase_multi;
-  uint8_t detune1;
-  uint8_t detune2;
-  uint8_t ams_enable;
+      for (int32_t i = 0; i < ADSR_WIDTH - 1; i++) {
 
-  switch (op) {
-    case 1:
-      key_scaling  = v->key_scaling_m1;
-      phase_multi  = v->phase_multi_m1;
-      detune1      = v->detune1_m1;
-      detune2      = v->detune2_m1;
-      ams_enable   = v->ams_enable_m1;
-      break;
+        int32_t x1 = panel->x + 20 + i;
+        int32_t x1a = x1 >> 4;
+        uint16_t x1b = 0x8000 >> (x1 % 16);
 
-    case 2:
-      key_scaling  = v->key_scaling_c1;
-      phase_multi  = v->phase_multi_c1;
-      detune1      = v->detune1_c1;
-      detune2      = v->detune2_c1;
-      ams_enable   = v->ams_enable_c1;
-      break;
+        int32_t y1 = 20.5 * ( 1.0 + wave[i]   );
+        int32_t y2 = 20.5 * ( 1.0 + wave[i+1] );
 
-    case 3:
-      key_scaling  = v->key_scaling_m2;
-      phase_multi  = v->phase_multi_m2;
-      detune1      = v->detune1_m2;
-      detune2      = v->detune2_m2;
-      ams_enable   = v->ams_enable_m2;    
-      break;
+        if (y1 < 0) y1 = 0;
+        if (y2 < 0) y2 = 0;
+        if (y1 > 39) y1 = 39;
+        if (y2 > 39) y2 = 39;
 
-    case 4:
-      key_scaling  = v->key_scaling_c2;
-      phase_multi  = v->phase_multi_c2;
-      detune1      = v->detune1_c2;
-      detune2      = v->detune2_c2;
-      ams_enable   = v->ams_enable_c2;
-      break;
-    
-    default:
-      goto exit;
+        if (y1 > y2) {
+          for (int32_t y = y1; y > y2; y--) {
+            frame_buffer[ y ][ x1a - x0a ] |= x1b;
+          }
+        } else if (y1 < y2) {
+          for (int32_t y = y1; y < y2; y++) {
+            frame_buffer[ y ][ x1a - x0a ] |= x1b;
+          }
+        } else {
+          frame_buffer[ y1 ][ x1a - x0a ] |= x1b;
+        }
+
+      }
+
+      WAIT_VBLANK;
+
+      for (int32_t i = 0; i < 40; i++) {
+        for (int32_t j = 0; j < ADSR_WIDTH/16 + 1; j++) {
+          int32_t x1 = panel->x + 20 + j * 16;
+          int32_t x1a = x1 >> 4;
+          TVRAM_PAGE0[ ( panel->y + 11 + i ) * 1024/16 + x1a ] = frame_buffer[i][j];
+        }
+      }
+
+    }
   }
 
   exit:

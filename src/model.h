@@ -5,6 +5,7 @@
 #include <time.h>
 #include "mdx.h"
 #include "voice.h"
+#include "opm.h"
 
 #define MAX_PATH_LEN (256)
 #define MAX_MES_LEN  (128)
@@ -27,6 +28,16 @@ typedef struct {
   float adsr_c1[ ADSR_WIDTH ];
   float adsr_m2[ ADSR_WIDTH ];
   float adsr_c2[ ADSR_WIDTH ];
+
+  // wave chart data
+  float wave_m1[ ADSR_WIDTH ];
+  float wave_c1[ ADSR_WIDTH ];
+  float wave_m2[ ADSR_WIDTH ];
+  float wave_c2[ ADSR_WIDTH ];
+  float wave_total[ ADSR_WIDTH ];
+
+  // opm wave handle
+  OPM_WAVE opm_wave;
 
   // for MDX list panel
   MDX_LIST* mdx_list;

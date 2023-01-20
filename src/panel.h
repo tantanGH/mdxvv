@@ -8,7 +8,7 @@
 #define PANEL_MENU        (11)
 
 #define PANEL_CON_OPS     (20)
-#define PANEL_FINAL_WAVE  (21)
+#define PANEL_CON_WAVE    (21)
 
 #define PANEL_M1_OPS      (30)
 #define PANEL_C1_OPS      (31)

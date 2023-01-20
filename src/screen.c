@@ -98,8 +98,8 @@ PANEL* screen_get_panel(SCREEN_HANDLE* scr, int32_t panel_id) {
     case PANEL_CON_OPS:
       panel = &(scr->panel_con_ops);
       break;
-    case PANEL_FINAL_WAVE:
-      panel = &(scr->panel_final_wave);
+    case PANEL_CON_WAVE:
+      panel = &(scr->panel_con_wave);
       break;
 
     case PANEL_M1_OPS:

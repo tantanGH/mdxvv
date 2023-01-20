@@ -14,6 +14,7 @@
 #include "keyboard.h"
 #include "opm.h"
 #include "mxdrv.h"
+#include "memory.h"
 
 // create model
 static void create_model(MODEL* m) {
@@ -36,6 +37,21 @@ static void create_model(MODEL* m) {
   m->auto_fadeout_time = DEFAULT_FADEOUT_TIME;
 
   m->use_high_memory = 0;
+
+  OPM_WAVE* ow = &(m->opm_wave);
+  ow->num_samples = ADSR_WIDTH;
+  ow->available = 0;
+  ow->voice = NULL;
+
+  ow->adsr_m1 = m->adsr_m1;
+  ow->adsr_c1 = m->adsr_c1;
+  ow->adsr_m2 = m->adsr_m2;
+  ow->adsr_c2 = m->adsr_c2;
+  ow->wave_m1 = m->wave_m1;
+  ow->wave_c1 = m->wave_c1;
+  ow->wave_m2 = m->wave_m2;
+  ow->wave_c2 = m->wave_c2;
+  ow->wave_total = m->wave_total;
 
   m->original_current_drive = CURDRV();
   getcwd(m->original_current_dir, MAX_PATH_LEN);
@@ -101,8 +117,8 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   panel_put_text(p, x_ofs, y_ofs + y_step*4, COLOR_PURPLE, FONT_BOLD, "OP");
 
   // final wave panel
-  p = screen_get_panel(scr, PANEL_FINAL_WAVE);
-  p->id = PANEL_FINAL_WAVE;
+  p = screen_get_panel(scr, PANEL_CON_WAVE);
+  p->id = PANEL_CON_WAVE;
   p->x = 0;
   p->y = 266;
   p->width = 160;
@@ -110,7 +126,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->scr = scr;
   p->model = model;
 
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
 
@@ -296,7 +312,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
 
   // operator c1 wave panel
@@ -310,7 +326,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
 
   // operator m2 wave panel
@@ -324,7 +340,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
 
   // operator c2 wave panel
@@ -338,7 +354,7 @@ static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
   p->model = model;
 
   //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
   panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
   panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
   panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
@@ -572,21 +588,37 @@ static void play_mdx(SCREEN_HANDLE* scr, MODEL* m, int32_t mi, int32_t scan_code
   opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
             v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
 
+  // prepare wave curves
+  OPM_WAVE* ow = &(m->opm_wave);
+  ow->voice = v;
+  ow->available = 0;
+  opm_wave_plot(ow, ADSR_WIDTH);
+
   // program and operator panels shortcuts
-  PANEL* panel_con_ops = screen_get_panel(scr, PANEL_CON_OPS);
+  PANEL* panel_con_ops  = screen_get_panel(scr, PANEL_CON_OPS );
+  PANEL* panel_con_wave = screen_get_panel(scr, PANEL_CON_WAVE);
+
   PANEL* panel_m1_ops  = screen_get_panel(scr, PANEL_M1_OPS );
   PANEL* panel_c1_ops  = screen_get_panel(scr, PANEL_C1_OPS );
   PANEL* panel_m2_ops  = screen_get_panel(scr, PANEL_M2_OPS );
   PANEL* panel_c2_ops  = screen_get_panel(scr, PANEL_C2_OPS );
+
   PANEL* panel_m1_env  = screen_get_panel(scr, PANEL_M1_ENV );
   PANEL* panel_c1_env  = screen_get_panel(scr, PANEL_C1_ENV );
   PANEL* panel_m2_env  = screen_get_panel(scr, PANEL_M2_ENV );
   PANEL* panel_c2_env  = screen_get_panel(scr, PANEL_C2_ENV );
 
+  PANEL* panel_m1_wave = screen_get_panel(scr, PANEL_M1_WAVE );
+  PANEL* panel_c1_wave = screen_get_panel(scr, PANEL_C1_WAVE );
+  PANEL* panel_m2_wave = screen_get_panel(scr, PANEL_M2_WAVE );
+  PANEL* panel_c2_wave = screen_get_panel(scr, PANEL_C2_WAVE );
+
   // refresh view
   WAIT_VSYNC;
   WAIT_VBLANK;
+
   panel_con_refresh(panel_con_ops);
+
   panel_op_refresh(panel_m1_ops, 1);
   panel_op_refresh(panel_c1_ops, 2);
   panel_op_refresh(panel_m2_ops, 3);
@@ -596,6 +628,12 @@ static void play_mdx(SCREEN_HANDLE* scr, MODEL* m, int32_t mi, int32_t scan_code
   panel_op_envelope_refresh(panel_c1_env, 2);
   panel_op_envelope_refresh(panel_m2_env, 3);
   panel_op_envelope_refresh(panel_c2_env, 4);
+
+  panel_op_waveform_refresh(panel_con_wave, 0);
+  panel_op_waveform_refresh(panel_m1_wave, 1);
+  panel_op_waveform_refresh(panel_c1_wave, 2);
+  panel_op_waveform_refresh(panel_m2_wave, 3);
+  panel_op_waveform_refresh(panel_c2_wave, 4);
 
   // close MDX
   mdx_close(&mdx, m->use_high_memory);
@@ -668,6 +706,32 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   screen_init(scr, preserve_graphic);
   screen_init_font(scr);
 
+  // if high memory mode, copy model and screen instances
+  if (m->use_high_memory) {
+
+    // new model instance on high memory
+    MODEL* m2 = (MODEL*)malloc_himem(sizeof(MODEL), m->use_high_memory);
+    memcpy(m2, m, sizeof(MODEL));
+    m = m2;
+
+    // need to remap because now we use high memory
+    OPM_WAVE* ow = &(m->opm_wave);
+    ow->adsr_m1 = m->adsr_m1;
+    ow->adsr_c1 = m->adsr_c1;
+    ow->adsr_m2 = m->adsr_m2;
+    ow->adsr_c2 = m->adsr_c2;
+    ow->wave_m1 = m->wave_m1;
+    ow->wave_c1 = m->wave_c1;
+    ow->wave_m2 = m->wave_m2;
+    ow->wave_c2 = m->wave_c2;
+    ow->wave_total = m->wave_total;
+
+    // new screen instance on high memory
+    SCREEN_HANDLE* scr2 = (SCREEN_HANDLE*)malloc_himem(sizeof(SCREEN_HANDLE), m->use_high_memory);
+    memcpy(scr2, scr, sizeof(SCREEN_HANDLE));
+    scr = scr2;
+  }
+
   // create MVC view
   create_view(scr, m);
 
@@ -689,15 +753,23 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   PANEL* panel_mdx_list = screen_get_panel(scr, PANEL_MDX_LIST);
 
   // program and operator panels shortcuts
-  PANEL* panel_con_ops = screen_get_panel(scr, PANEL_CON_OPS);
+  PANEL* panel_con_ops  = screen_get_panel(scr, PANEL_CON_OPS );
+  PANEL* panel_con_wave = screen_get_panel(scr, PANEL_CON_WAVE);
+    
   PANEL* panel_m1_ops  = screen_get_panel(scr, PANEL_M1_OPS );
   PANEL* panel_c1_ops  = screen_get_panel(scr, PANEL_C1_OPS );
   PANEL* panel_m2_ops  = screen_get_panel(scr, PANEL_M2_OPS );
   PANEL* panel_c2_ops  = screen_get_panel(scr, PANEL_C2_OPS );
+
   PANEL* panel_m1_env  = screen_get_panel(scr, PANEL_M1_ENV );
   PANEL* panel_c1_env  = screen_get_panel(scr, PANEL_C1_ENV );
   PANEL* panel_m2_env  = screen_get_panel(scr, PANEL_M2_ENV );
   PANEL* panel_c2_env  = screen_get_panel(scr, PANEL_C2_ENV );
+
+  PANEL* panel_m1_wave = screen_get_panel(scr, PANEL_M1_WAVE );
+  PANEL* panel_c1_wave = screen_get_panel(scr, PANEL_C1_WAVE );
+  PANEL* panel_m2_wave = screen_get_panel(scr, PANEL_M2_WAVE );
+  PANEL* panel_c2_wave = screen_get_panel(scr, PANEL_C2_WAVE );
 
   // get the initial MDX list
   update_mdx_list(scr, m, mdx_dir);
@@ -714,8 +786,8 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
     if (B_KEYSNS() != 0) {
 
       int32_t scan_code = B_KEYINP() >> 8;
-
       int32_t shift_sense = B_SFTSNS();
+
       if (shift_sense & 0x01) {
         scan_code += 0x100;
       }
@@ -833,10 +905,11 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
           break;
         }
 
-        case KEY_SCAN_CODE_TAB: {
+        case KEY_SCAN_CODE_TAB:
+        case KEY_SCAN_CODE_SHIFT_TAB: {
 
           if (m->voice_set != NULL) {
-            if (B_SFTSNS() & 0x01) {
+            if (scan_code == KEY_SCAN_CODE_SHIFT_TAB) {
               // voice number prev
               m->voice_index = ( m->voice_index - 1 + m->voice_set->voice_count ) % m->voice_set->voice_count;
             } else {
@@ -855,6 +928,12 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
             opm_adsr(m->adsr_c2, ADSR_WIDTH, ADSR_KEY_OFF, 
                     v->attack_rate_c2, v->decay_rate1_c2, v->decay_rate2_c2, v->release_rate_c2, v->decay_level1_c2);
 
+            // prepare wave curves
+            OPM_WAVE* ow = &(m->opm_wave);
+            ow->voice = v;
+            ow->available = 0;
+            opm_wave_plot(ow,ADSR_WIDTH);
+
             // wait vsync
             WAIT_VSYNC;
             WAIT_VBLANK;
@@ -871,6 +950,13 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
             panel_op_envelope_refresh(panel_c1_env, 2);
             panel_op_envelope_refresh(panel_m2_env, 3);
             panel_op_envelope_refresh(panel_c2_env, 4);
+
+            // refresh wave panels
+            panel_op_waveform_refresh(panel_con_wave, 0);
+            panel_op_waveform_refresh(panel_m1_wave, 1);
+            panel_op_waveform_refresh(panel_c1_wave, 2);
+            panel_op_waveform_refresh(panel_m2_wave, 3);
+            panel_op_waveform_refresh(panel_c2_wave, 4);
           }
           break;
         }
@@ -1097,6 +1183,12 @@ quit:
 
   // reset screen
   screen_reset(scr, preserve_graphic);
+
+  // reclaim screen and model high memory objs
+  if (m->use_high_memory) {
+    free_himem(scr, m->use_high_memory);
+    free_himem(m, m->use_high_memory);
+  }
 
   // resume current drive and directory
   CHGDRV(m->original_current_drive);

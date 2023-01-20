@@ -38,7 +38,7 @@ typedef struct {
   PANEL panel_menu;
 
   PANEL panel_con_ops;
-  PANEL panel_final_wave;
+  PANEL panel_con_wave;
 
   PANEL panel_m1_ops;
   PANEL panel_c1_ops;
