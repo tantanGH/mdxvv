@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <string.h>
+#include <stdint.h>
 #include <time.h>
 #include <doslib.h>
 #include <iocslib.h>
@@ -10,7 +11,7 @@
 #include "diagram.h"
 
 // clear
-void panel_clear(PANEL* panel, int x, int y, int width, int height, int color) {
+void panel_clear(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color) {
   if (panel != NULL) {
     struct TXFILLPTR fill = { 0, panel->x + x, panel->y + y, width, height, 0 };
     if (color & 0x01) {
@@ -32,7 +33,7 @@ void panel_clear_all(PANEL* panel) {
 }
 
 // fill
-void panel_fill(PANEL* panel, int x, int y, int width, int height, int color) {
+void panel_fill(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color) {
   if (panel != NULL) {
     struct TXFILLPTR fill = { 0, panel->x + x, panel->y + y, width, height, 0xffff };
     if (color & 0x01) {
@@ -47,14 +48,14 @@ void panel_fill(PANEL* panel, int x, int y, int width, int height, int color) {
 }
 
 // fill all
-void panel_fill_all(PANEL* panel, int color) {
+void panel_fill_all(PANEL* panel, int32_t color) {
   if (panel != NULL) {
     panel_fill(panel, 0, 0, panel->width, panel->height, color);
   }
 }
 
 // box 
-void panel_box(PANEL* panel, int x, int y, int width, int height, int color) {
+void panel_box(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color) {
   if (panel != NULL) {
     struct TBOXPTR box = { 0, panel->x + x, panel->y + y, width, height, 0xffff };
     if (color & 0x01) {
@@ -69,14 +70,14 @@ void panel_box(PANEL* panel, int x, int y, int width, int height, int color) {
 }
 
 // box all
-void panel_box_all(PANEL* panel, int color) {
+void panel_box_all(PANEL* panel, int32_t color) {
   if (panel != NULL) {
     panel_box(panel, 0, 0, panel->width, panel->height, color);
   }
 }
 
 // x line
-void panel_xline(PANEL* panel, int x, int y, int len, int color) {
+void panel_xline(PANEL* panel, int32_t x, int32_t y, int32_t len, int32_t color) {
   if (panel != NULL) {
     struct XLINEPTR xlp = { 0, panel->x + x, panel->y + y, len, 0xffff };
     if (color & 0x01) {
@@ -91,7 +92,7 @@ void panel_xline(PANEL* panel, int x, int y, int len, int color) {
 }
 
 // y line
-void panel_yline(PANEL* panel, int x, int y, int len, int color) {
+void panel_yline(PANEL* panel, int32_t x, int32_t y, int32_t len, int32_t color) {
   if (panel != NULL) {
     struct YLINEPTR ylp = { 0, panel->x + x, panel->y + y, len, 0xffff };
     if (color & 0x01) {
@@ -106,13 +107,13 @@ void panel_yline(PANEL* panel, int x, int y, int len, int color) {
 }
 
 // put text in 8x8 font
-void panel_put_text(PANEL* panel, int x, int y, int color, int bold, const unsigned char* text) {
+void panel_put_text(PANEL* panel, int32_t x, int32_t y, int32_t color, int32_t bold, const uint8_t* text) {
 
   if (panel == NULL) return;
 
   SCREEN_HANDLE* scr = (SCREEN_HANDLE*)(panel->scr);
-  int len = strlen(text);
-  int ofs = 0;
+  int32_t len = strlen(text);
+  int32_t ofs = 0;
   for (int i = 0; i < len; i++) {
     int fx = x + 8*ofs;
     if (text[i] == '&') {   // underscore
@@ -140,7 +141,7 @@ void panel_put_text(PANEL* panel, int x, int y, int color, int bold, const unsig
 }
 
 // put text in 8x8 bold font with centering
-void panel_put_text_center(PANEL* panel, int y, int color, int bold, const unsigned char* text) {
+void panel_put_text_center(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text) {
   int len = strlen(text);
   int fx = (panel->width - 8 * len)/2;
   int fy = y;
@@ -148,7 +149,7 @@ void panel_put_text_center(PANEL* panel, int y, int color, int bold, const unsig
 }
 
 // put text in 8x8 bold font with right alignment
-void panel_put_text_right(PANEL* panel, int y, int color, int bold, const unsigned char* text) {
+void panel_put_text_right(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text) {
   int len = strlen(text);
   int fx = panel->width - 8 * len;
   int fy = y;
@@ -156,7 +157,7 @@ void panel_put_text_right(PANEL* panel, int y, int color, int bold, const unsign
 }
 
 // put text in 8x16/16x16 font
-void panel_put_text16(PANEL* panel, int x, int y, int color, const unsigned char* text) {
+void panel_put_text16(PANEL* panel, int32_t x, int32_t y, int32_t color, const uint8_t* text) {
 
   if (panel == NULL) return;
 
@@ -279,7 +280,7 @@ exit:
 }
 
 // refresh operator panel with the latest model content
-void panel_op_refresh(PANEL* panel, int op) {
+void panel_op_refresh(PANEL* panel, int32_t op) {
 
   if (panel == NULL) goto exit;
 
@@ -293,17 +294,17 @@ void panel_op_refresh(PANEL* panel, int op) {
 
   VOICE* v = &(vs->voices[ m->voice_index ]);
 
-  unsigned char attack_rate;
-  unsigned char decay_rate1;
-  unsigned char decay_rate2;
-  unsigned char release_rate;
-  unsigned char decay_level1;
-  unsigned char total_level;
-  unsigned char key_scaling;
-  unsigned char phase_multi;
-  unsigned char detune1;
-  unsigned char detune2;
-  unsigned char ams_enable;
+  uint8_t attack_rate;
+  uint8_t decay_rate1;
+  uint8_t decay_rate2;
+  uint8_t release_rate;
+  uint8_t decay_level1;
+  uint8_t total_level;
+  uint8_t key_scaling;
+  uint8_t phase_multi;
+  uint8_t detune1;
+  uint8_t detune2;
+  uint8_t ams_enable;
 
   switch (op) {
     case 1:
@@ -446,7 +447,7 @@ void panel_op_refresh(PANEL* panel, int op) {
 }
 
 // refresh operator envelope panel with the latest model content
-void panel_op_envelope_refresh(PANEL* panel, int op) {
+void panel_op_envelope_refresh(PANEL* panel, int32_t op) {
   if (panel != NULL) {  
     MODEL* m = panel->model;
     float* adsr = NULL;
@@ -529,7 +530,7 @@ void panel_op_envelope_refresh(PANEL* panel, int op) {
 }
 
 // refresh operator waveform panel with the latest model content
-void panel_op_waveform_refresh(PANEL* panel, int op) {
+void panel_op_waveform_refresh(PANEL* panel, int32_t op) {
 
   if (panel == NULL) goto exit;
   
@@ -543,11 +544,11 @@ void panel_op_waveform_refresh(PANEL* panel, int op) {
 
   VOICE* v = &(vs->voices[ m->voice_index ]);
 
-  unsigned char key_scaling;
-  unsigned char phase_multi;
-  unsigned char detune1;
-  unsigned char detune2;
-  unsigned char ams_enable;
+  uint8_t key_scaling;
+  uint8_t phase_multi;
+  uint8_t detune1;
+  uint8_t detune2;
+  uint8_t ams_enable;
 
   switch (op) {
     case 1:
@@ -590,7 +591,7 @@ void panel_op_waveform_refresh(PANEL* panel, int op) {
 }
 
 // show message with scroll up
-void panel_message_show(PANEL* panel, const unsigned char *message) {
+void panel_message_show(PANEL* panel, const uint8_t* message) {
 
   if (panel == NULL || message == NULL) return;
 
@@ -601,16 +602,16 @@ void panel_message_show(PANEL* panel, const unsigned char *message) {
 
   if (m->message_index == m->message_view_size) {
     // scroll up
-    for (int i = 0; i < 10 * (m->message_view_size - 1); i++) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 0; i < 10 * (m->message_view_size - 1); i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + 4 + i ) * 1024 / 16 + panel->x / 16 + j ]
          = TVRAM_PAGE0[ ( panel->y + 4 + i + 10 ) * 1024 / 16 + panel->x / 16 + j ];
         TVRAM_PAGE1[ ( panel->y + 4 + i ) * 1024 / 16 + panel->x / 16 + j ]
          = TVRAM_PAGE1[ ( panel->y + 4 + i + 10 ) * 1024 / 16 + panel->x / 16 + j ];
       }
     }
-    for (int i = 0; i < 10; i++) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 0; i < 10; i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + 4 + ( m->message_view_size - 1 ) * 10 + i ) * 1024 / 16 + j ] = 0x0000;
         TVRAM_PAGE1[ ( panel->y + 4 + ( m->message_view_size - 1 ) * 10 + i ) * 1024 / 16 + j ] = 0x0000;
       }
@@ -628,7 +629,7 @@ void panel_message_show(PANEL* panel, const unsigned char *message) {
 }
 
 // trim long file name
-static void trim_file_name(unsigned char* buffer, int buflen, const unsigned char* file_name) {
+static void trim_file_name(uint8_t* buffer, int32_t buflen, const uint8_t* file_name) {
   if (strlen(file_name) <= buflen) {
     strcpy(buffer, file_name);
     return;
@@ -649,13 +650,13 @@ void panel_mdx_list_refresh(PANEL* panel) {
 
   MODEL* m = panel->model;
   MDX_LIST* mdx_list = m->mdx_list;
-  int yofs = 0;
+  int32_t yofs = 0;
 
   panel_clear(panel, 4, 0, 760, 16*m->list_view_size, COLOR_WHITE | COLOR_DARK_PURPLE);
 
   // list sub directories first
-  for (int i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
-    int si = i ;
+  for (int32_t i = 0; i < mdx_list->sub_dir_count && yofs < m->list_view_size; i++) {
+    int32_t si = i ;
     panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     yofs++;
@@ -663,8 +664,8 @@ void panel_mdx_list_refresh(PANEL* panel) {
 
   // list MDX files
   for (int i = 0; i < mdx_list->mdx_count && yofs < m->list_view_size; i++) {
-    static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
-    int mi = i ;
+    static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
+    int32_t mi = i ;
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
     panel_put_text(panel, 4, 16 * yofs + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
     panel_put_text16(panel, 4 + 8*16, 16 * yofs, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
@@ -701,8 +702,8 @@ void panel_mdx_list_up(PANEL* panel) {
 
     // we are already at the top of the list, scrolling down
     panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);    // erase cursor
-    for (int i = 16 * m->list_view_size - 1; i >= 16; i--) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 16 * m->list_view_size - 1; i >= 16; i--) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
          = TVRAM_PAGE0[ ( panel->y + i - 16 ) * 1024 / 16 + panel->x / 16 + j ];
         TVRAM_PAGE1[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -711,8 +712,8 @@ void panel_mdx_list_up(PANEL* panel) {
     }
 
     // erase the top line
-    for (int i = 0; i < 16; i++) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 0; i < 16; i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + j ] = 0x0000;
         TVRAM_PAGE1[ ( panel->y + i ) * 1024 / 16 + j ] = 0x0000;
       }
@@ -724,13 +725,13 @@ void panel_mdx_list_up(PANEL* panel) {
     // the new line is a sub dir? or a MDX?    
     if (m->list_view_index < mdx_list->sub_dir_count) {
       // sub dir
-      int si = m->list_view_index;
+      int32_t si = m->list_view_index;
       panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, "<DIR>");
       panel_put_text16(panel, 4 + 8*16, 0, COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     } else {
       // MDX
-      static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
-      int mi = m->list_view_index - mdx_list->sub_dir_count;
+      static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
+      int32_t mi = m->list_view_index - mdx_list->sub_dir_count;
       trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
       panel_put_text(panel, 4, 0 + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
       panel_put_text16(panel, 4 + 8*16, 0, COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
@@ -767,8 +768,8 @@ void panel_mdx_list_down(PANEL* panel) {
 
     // we are at the end of list, scrolling up
     panel_clear(panel, 4, 16 * m->list_index + 15, 760, 1, COLOR_WHITE);   // erase cursor
-    for (int i = 0; i < 16 * (m->list_view_size - 1); i++) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 0; i < 16 * (m->list_view_size - 1); i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
          = TVRAM_PAGE0[ ( panel->y + i + 16 ) * 1024 / 16 + panel->x / 16 + j ];
         TVRAM_PAGE1[ ( panel->y + i ) * 1024 / 16 + panel->x / 16 + j ]
@@ -777,8 +778,8 @@ void panel_mdx_list_down(PANEL* panel) {
     }
 
     // erase the bottom line
-    for (int i = 0; i < 16; i++) {
-      for (int j = 0; j < panel->width / 16; j++) {
+    for (int32_t i = 0; i < 16; i++) {
+      for (int32_t j = 0; j < panel->width / 16; j++) {
         TVRAM_PAGE0[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
         TVRAM_PAGE1[ ( panel->y + ( m->list_view_size - 1 ) * 16 + i ) * 1024 / 16 + j ] = 0x0000;
       }
@@ -795,8 +796,8 @@ void panel_mdx_list_down(PANEL* panel) {
       panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_DARK_PURPLE, mdx_list_get_sorted_sub_dir_name(mdx_list, si, m->list_sort_order));
     } else {
       // MDX
-      static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
-      int mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
+      static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
+      int32_t mi = m->list_view_index + m->list_view_size -1 - mdx_list->sub_dir_count;
       trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, mdx_list_get_sorted_file_name(mdx_list, mi, m->list_sort_order));
       panel_put_text(panel, 4, 16 * (m->list_view_size - 1) + 7, COLOR_DARK_PURPLE, FONT_REGULAR, trimmed_file_name);
       panel_put_text16(panel, 4 + 8*16, 16 * (m->list_view_size - 1), COLOR_PURPLE, mdx_list_get_sorted_data_title(mdx_list, mi, m->list_sort_order));
@@ -810,10 +811,8 @@ void panel_mdx_list_down(PANEL* panel) {
 // show mdx list path
 void panel_mdx_play_show_path(PANEL* panel) {
   if (panel != NULL) {
-
     WAIT_VBLANK;
-
-    static unsigned char trimmed_file_name [ TRIM_FILE_NAME_LEN ];
+    static uint8_t trimmed_file_name [ TRIM_FILE_NAME_LEN ];
     trim_file_name(trimmed_file_name, TRIM_FILE_NAME_LEN, panel->model->mdx_list->path_name);
     panel_clear(panel, 4, 10, 8*16, 7, COLOR_DARK_PURPLE);
     panel_put_text(panel, 4, 10, COLOR_DARK_PURPLE, FONT_BOLD, trimmed_file_name);
@@ -827,14 +826,14 @@ void panel_mdx_play_show_title(PANEL* panel) {
     WAIT_VBLANK;
     panel_clear(panel, 4 + 8*16, 3, panel->width - 4 - 8*16 - 2, panel->height - 6, COLOR_WHITE);
     if ((m->mdx_list->sub_dir_count + m->mdx_list->mdx_count) > 0) {
-      int mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
+      int32_t mi = m->list_view_index + m->list_index - m->mdx_list->sub_dir_count;
       panel_put_text16(panel, 4 + 8*16, 3, COLOR_WHITE, mdx_list_get_sorted_data_title(m->mdx_list, mi, m->list_sort_order));
     }
   }
 }
 
 // show voice data export prompt
-void panel_mdx_play_prompt(PANEL* panel, int offset, int clear, const unsigned char* text) {
+void panel_mdx_play_prompt(PANEL* panel, int32_t offset, int32_t clear, const uint8_t* text) {
   if (panel != NULL) {
     WAIT_VBLANK;
     if (clear) {

@@ -1,14 +1,15 @@
 #ifndef __H_SCREEN__
 #define __H_SCREEN__
 
+#include <stdint.h>
 #include <iocslib.h>
 #include "panel.h"
 
-//#define GVRAM             ((volatile unsigned short*)0xC00000)
-#define TVRAM_PAGE0       ((volatile unsigned short*)0xE00000)
-#define TVRAM_PAGE1       ((volatile unsigned short*)0xE20000)
+//#define GVRAM             ((volatile uint16_t*)0xC00000)
+#define TVRAM_PAGE0       ((volatile uint16_t*)0xE00000)
+#define TVRAM_PAGE1       ((volatile uint16_t*)0xE20000)
 
-#define REG_GPIP          ((volatile unsigned char*)0xE88001)     // generic I/O port (Inside X68000 p81)
+#define REG_GPIP          ((volatile uint8_t*)0xE88001)     // generic I/O port (Inside X68000 p81)
 
 #define WAIT_VSYNC        while(!(REG_GPIP[0] & 0x10))
 #define WAIT_VBLANK       while(REG_GPIP[0] & 0x10)
@@ -23,7 +24,7 @@
 #define COLOR_PURPLE       (2)
 #define COLOR_DARK_PURPLE  (3)
 
-#define FONT_ADDR_8x8     ((unsigned char*)0xF3A000)
+#define FONT_ADDR_8x8     ((uint8_t*)0xF3A000)
 #define FONT_BYTES_8x8    (8)
 
 #define FONT_REGULAR      (0)
@@ -60,16 +61,16 @@ typedef struct {
   PANEL panel_message;
   
   // text palette colors
-  unsigned short tpalette[ 4 ];
+  uint16_t tpalette[ 4 ];
 
   // original graphic palettes
-  unsigned short original_gpalette[ 16 ];
+  uint16_t original_gpalette[ 16 ];
 
   // original text palettes
-  unsigned short original_tpalette[ 4 ];
+  uint16_t original_tpalette[ 4 ];
 
   // original function key display mode
-  int original_fnk_mode;
+  int32_t original_fnk_mode;
 
   // 8x8 normal font data
   struct FNTBUF font_data_8x8[ 256 ];
@@ -80,10 +81,9 @@ typedef struct {
 } SCREEN_HANDLE;
 
 // prototype declarations for SCREEN_HANDLE
-void screen_init(SCREEN_HANDLE* scr, int preserve_graphic);
-void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic);
+void screen_init(SCREEN_HANDLE* scr, int32_t preserve_graphic);
+void screen_reset(SCREEN_HANDLE* scr, int32_t preserve_graphic);
 void screen_init_font(SCREEN_HANDLE* scr);
-PANEL* screen_get_panel(SCREEN_HANDLE* scr, int panel_id);
-
+PANEL* screen_get_panel(SCREEN_HANDLE* scr, int32_t panel_id);
 
 #endif

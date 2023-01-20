@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include "voice.h"
 #include "memory.h"
 
@@ -10,13 +11,13 @@ void voice_set_close(VOICE_SET* vs) {
   }
 }
 
-int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
+int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int32_t format) {
 
-  int rc = -1;
+  int32_t rc = -1;
 
   if (vs == NULL || vs->voices == NULL || fp == NULL) goto exit;
 
-  int line = 1000;
+  int32_t line = 1000;
 
   switch (format) {
     case FORMAT_MDX:
@@ -40,7 +41,7 @@ int voice_set_fwrite(VOICE_SET* vs, FILE* fp, int format) {
       goto exit;
   }
 
-  for (int i = 0; i < vs->voice_count; i++) {
+  for (int32_t i = 0; i < vs->voice_count; i++) {
 
     VOICE* v = &(vs->voices[i]);
 

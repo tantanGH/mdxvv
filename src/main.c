@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <doslib.h>
 #include <process.h>
 #include <direct.h>
@@ -11,6 +12,7 @@
 #include "panel.h"
 #include "keyboard.h"
 #include "opm.h"
+#include "mxdrv.h"
 
 // create model
 static void create_model(MODEL* model) {
@@ -557,9 +559,18 @@ int main(int argc, char* argv[]) {
   PANEL* panel_m2_env  = screen_get_panel(scr, PANEL_M2_ENV );
   PANEL* panel_c2_env  = screen_get_panel(scr, PANEL_C2_ENV );
 
+  // if any MDX music is in the driver, show its title
+  uint8_t* mml_name = mxdrv_mml_name();
+  if (mml_name != NULL) {
+    panel_mdx_play_prompt(panel_mdx_play, 0, 1, mml_name);
+  }
+
   // get the initial MDX list
   update_mdx_list(scr, m, mdx_dir);
-    
+
+  // playing status
+  int playing = 0;
+
   // main loop
   for (;;) {
 
@@ -658,6 +669,7 @@ int main(int argc, char* argv[]) {
               panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
             } else {
               panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
+              playing = 1;
             }
 
             // move cursor before loading MDX (takes time)
@@ -836,37 +848,56 @@ int main(int argc, char* argv[]) {
 
         case KEY_SCAN_CODE_S: {
           // pause playing MDX
-          panel_message_show(panel_message, MXP_EXEC " -s");
-          if (system(MXP_EXEC " -s >NUL") != 0) {
-            panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          }
+          mxdrv_m_stop();
+          panel_message_show(panel_message, "Paused.");
+          //panel_message_show(panel_message, MXP_EXEC " -s");
+          //if (system(MXP_EXEC " -s >NUL") != 0) {
+          //  panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+          //}
           break;
         }
 
         case KEY_SCAN_CODE_C: {
           // resume playing MDX
-          panel_message_show(panel_message, MXP_EXEC " -c");
-          if (system(MXP_EXEC "-c >NUL") != 0) {
-            panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          }
+          mxdrv_m_cont();
+          panel_message_show(panel_message, "Resumed.");
+          //panel_message_show(panel_message, MXP_EXEC " -c");
+          //if (system(MXP_EXEC "-c >NUL") != 0) {
+          //  panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+          //}
+          break;
+        }
+
+        case KEY_SCAN_CODE_P: {
+          // play MDX
+          mxdrv_m_play();
+          panel_message_show(panel_message, "Played.");
+          //panel_message_show(panel_message, MXP_EXEC " -p");
+          //if (system(MXP_EXEC "-p >NUL") != 0) {
+          //  panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+          //}
           break;
         }
 
         case KEY_SCAN_CODE_E: {
           // end playing MDX
-          panel_message_show(panel_message, MXP_EXEC " -e");
-          if (system(MXP_EXEC "-e >NUL") != 0) {
-            panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          }
+          mxdrv_m_end();
+          panel_message_show(panel_message, "Stopped.");
+          //panel_message_show(panel_message, MXP_EXEC " -e");
+          //if (system(MXP_EXEC "-e >NUL") != 0) {
+          //  panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+          //}
           break;
         }
 
         case KEY_SCAN_CODE_F: {
           // fade out playing MDX
-          panel_message_show(panel_message, MXP_EXEC " -f");
-          if (system(MXP_EXEC "-f >NUL") != 0) {
-            panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
-          }
+          mxdrv_m_fadeout(20);
+          panel_message_show(panel_message, "Fadeout.");
+          //panel_message_show(panel_message, MXP_EXEC " -f");
+          //if (system(MXP_EXEC "-f >NUL") != 0) {
+          //  panel_message_show(panel_message, "!!! " MXP_EXEC " execution failure.");
+          //}
           break;
         }
 
@@ -917,7 +948,7 @@ int main(int argc, char* argv[]) {
 
         case KEY_SCAN_CODE_H: {
           // show help message
-          panel_message_show(panel_message, "MDXVV.X version " VERSION);
+          panel_message_show(panel_message, "MDXVV.X version " VERSION "\r\n");
           panel_message_show(panel_message, "UP/DOWN: Select MDX  CR/ENTER: Play MDX or Move Dir");
           panel_message_show(panel_message, "SPACE/BS: Play and Down/Up  S/C: Pause/Resume  </>:List Top/Bottom");
           panel_message_show(panel_message, ".: Parent Dir  \\: Root Dir  LEFT/RIGHT: Change Drive  R:Revese Sort");
@@ -926,6 +957,14 @@ int main(int argc, char* argv[]) {
         }
 
       }
+    }
+
+    if (playing) {
+      uint16_t mxdrv_status = mxdrv_m_stat();
+      if (mxdrv_status == MXDRV_STATUS_STOPPED) {
+        panel_message_show(panel_message, "MXDRV stopped.");
+      }
+      playing = 0;
     }
   }
 

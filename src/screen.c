@@ -1,19 +1,20 @@
 #include <iocslib.h>
 #include <doslib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "screen.h"
 
 static void clear_text_screen() {
   struct TXFILLPTR fill = { 0, 0, 0, 768, 512, 0 };
-  for (int i = 0; i < 4; i++) {
+  for (int32_t i = 0; i < 4; i++) {
     fill.vram_page = i;
     TXFILL(&fill);  
   }
 }
 
 // clear and initialize screen and sprites
-void screen_init(SCREEN_HANDLE* scr, int preserve_graphic) {
+void screen_init(SCREEN_HANDLE* scr, int32_t preserve_graphic) {
 
   if (preserve_graphic) {
     // text clear only
@@ -29,7 +30,7 @@ void screen_init(SCREEN_HANDLE* scr, int preserve_graphic) {
   //B_CUROFF();
 
   // preserve original text palette
-  for (int i = 0; i < 4; i++) {
+  for (int32_t i = 0; i < 4; i++) {
     scr->original_tpalette[i] = TPALET(i,-1);
   }
 
@@ -41,7 +42,7 @@ void screen_init(SCREEN_HANDLE* scr, int preserve_graphic) {
 }
 
 // reset screen
-void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic) {
+void screen_reset(SCREEN_HANDLE* scr, int32_t preserve_graphic) {
 
   if (preserve_graphic) {
     clear_text_screen();
@@ -55,7 +56,7 @@ void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic) {
   //B_CURON();
 
   // resume text palette
-  for (int i = 0; i < 4; i++) {
+  for (int32_t i = 0; i < 4; i++) {
     TPALET(i, scr->original_tpalette[i]);
   }   
 }
@@ -63,7 +64,7 @@ void screen_reset(SCREEN_HANDLE* scr, int preserve_graphic) {
 // prepare 8x8 regular and bold font data
 void screen_init_font(SCREEN_HANDLE* scr) {
 
-  for (int i = 0; i < 256; i++) {
+  for (int32_t i = 0; i < 256; i++) {
 
     // 8x8 regular font
     scr->font_data_8x8[i].xl = 8;
@@ -74,7 +75,7 @@ void screen_init_font(SCREEN_HANDLE* scr) {
     scr->font_data_8x8_bold[i].xl = 8;
     scr->font_data_8x8_bold[i].yl = 8;
     memcpy(scr->font_data_8x8_bold[i].buffer, FONT_ADDR_8x8 + FONT_BYTES_8x8 * i, FONT_BYTES_8x8);
-    for (int j = 0; j < FONT_BYTES_8x8; j++) {
+    for (int32_t j = 0; j < FONT_BYTES_8x8; j++) {
       scr->font_data_8x8_bold[i].buffer[j] |= ( scr->font_data_8x8_bold[i].buffer[j] >> 1 ) & 0xff;
     }
 
@@ -82,7 +83,7 @@ void screen_init_font(SCREEN_HANDLE* scr) {
 }
 
 // obtain panel positions
-PANEL* screen_get_panel(SCREEN_HANDLE* scr, int panel_id) {
+PANEL* screen_get_panel(SCREEN_HANDLE* scr, int32_t panel_id) {
 
   PANEL* panel = NULL;
 

@@ -1,6 +1,7 @@
 #ifndef __H_PANEL__
 #define __H_PANEL__
 
+#include <stdint.h>
 #include "model.h"
 
 #define PANEL_ALL         (10)
@@ -32,34 +33,34 @@
 #define TRIM_FILE_NAME_LEN  (16)
 
 typedef struct {
-  int id;
-  int x;
-  int y;
-  int width;
-  int height;
+  int32_t id;
+  int32_t x;
+  int32_t y;
+  int32_t width;
+  int32_t height;
   void* scr;        // SCREEN_HANDLE* cannot be used because we have not defined it yet
   MODEL* model;     // model object tied to this panel
 } PANEL;
 
 // prototype declarations for PANEL
-void panel_clear(PANEL* panel, int x, int y, int width, int height, int color);
+void panel_clear(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color);
 void panel_clear_all(PANEL* panel);
-void panel_fill(PANEL* panel, int x, int y, int width, int height, int color);
-void panel_fill_all(PANEL* panel, int color);
-void panel_box(PANEL* panel, int x, int y, int width, int height, int color);
-void panel_box_all(PANEL* panel, int color);
-void panel_xline(PANEL* panel, int x, int y, int len, int color);
-void panel_yline(PANEL* panel, int x, int y, int len, int color);
+void panel_fill(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color);
+void panel_fill_all(PANEL* panel, int32_t color);
+void panel_box(PANEL* panel, int32_t x, int32_t y, int32_t width, int32_t height, int32_t color);
+void panel_box_all(PANEL* panel, int32_t color);
+void panel_xline(PANEL* panel, int32_t x, int32_t y, int32_t len, int32_t color);
+void panel_yline(PANEL* panel, int32_t x, int32_t y, int32_t len, int32_t color);
 
-void panel_put_text(PANEL* panel, int x, int y, int color, int bold, const unsigned char* text);
-void panel_put_text_center(PANEL* panel, int y, int color, int bold, const unsigned char* text);
-void panel_put_text_right(PANEL* panel, int y, int color, int bold, const unsigned char* text);
-void panel_put_text16(PANEL* panel, int cx, int cy, int color, const unsigned char* text);
+void panel_put_text(PANEL* panel, int32_t x, int32_t y, int32_t color, int32_t bold, const uint8_t* text);
+void panel_put_text_center(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text);
+void panel_put_text_right(PANEL* panel, int32_t y, int32_t color, int32_t bold, const uint8_t* text);
+void panel_put_text16(PANEL* panel, int32_t cx, int32_t cy, int32_t color, const uint8_t* text);
 
 void panel_con_refresh(PANEL* panel);
-void panel_op_refresh(PANEL* panel, int op);
-void panel_op_envelope_refresh(PANEL* panel, int op);
-void panel_op_waveform_refresh(PANEL* panel, int op);
+void panel_op_refresh(PANEL* panel, int32_t op);
+void panel_op_envelope_refresh(PANEL* panel, int32_t op);
+void panel_op_waveform_refresh(PANEL* panel, int32_t op);
 
 void panel_mdx_list_refresh(PANEL* panel);
 void panel_mdx_list_up(PANEL* panel);
@@ -67,8 +68,8 @@ void panel_mdx_list_down(PANEL* panel);
 
 void panel_mdx_play_show_path(PANEL* panel);
 void panel_mdx_play_show_title(PANEL* panel);
-void panel_mdx_play_prompt(PANEL* panel, int offset, int clear, const unsigned char* text);
+void panel_mdx_play_prompt(PANEL* panel, int32_t offset, int32_t clear, const uint8_t* text);
 
-void panel_message_show(PANEL* panel, const unsigned char* text);
+void panel_message_show(PANEL* panel, const uint8_t* text);
 
 #endif
