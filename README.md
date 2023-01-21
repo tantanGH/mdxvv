@@ -232,7 +232,7 @@ MDXVVを終了します。
 * その他
   * [ChatGPT](https://openai.com/blog/chatgpt/)
 
---
+
 
 <img src='images/mdxvv2.jpeg' width='806'/>
 
