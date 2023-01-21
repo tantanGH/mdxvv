@@ -174,9 +174,12 @@ MMDSP を使って現在のカーソル位置の曲を演奏します。MMDSP �
 
 ## 音色データのエキスポートについて / Voice Data Export
 
+to be documented
 
 ---
 
 ## Special Thanks
+
+to be documented
 
 ---
