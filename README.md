@@ -256,6 +256,8 @@ MDXVVを終了します。
 
 ## Contact / 連絡先
 
-tantan (https://github.com/tantanGH/ twitter:@snakGH)
+tantan
+ - GitHub: https://github.com/tantanGH/
+ - Twitter: https://twitter.com/snakGH/
 
 ---
