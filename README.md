@@ -116,6 +116,7 @@ MDXVVを終了します。
 
 - `ROLLUP`
 - `CTRL+f`
+- `CTRL+v`
 
 ページ送りを行います。
 
