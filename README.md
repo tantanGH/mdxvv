@@ -3,9 +3,11 @@ MDX Voice Viewer for X680x0/Human68k
 
 MDXセレクタ＆プレーヤー兼音色データビュワー＆抽出アプリケーションです。
 
+![](images/mdxvv1.png)
+
 ---
 
-## Install
+## インストール / Install
 
 MDXVVxxx.ZIP をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
@@ -19,7 +21,7 @@ MXDRV の常駐は必須です。
 
 ---
 
-## 起動方法
+## 起動方法 / How To Start
 
     MDXVV [options] [mdx-directory-name]
 
@@ -47,7 +49,7 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 
 ---
 
-## 操作方法
+## 操作方法 / Key Bindings
 
 操作はすべてキーボードで行います。
 
@@ -168,7 +170,7 @@ MMDSP を使って現在のカーソル位置の曲を演奏します。MMDSP �
 
 ---
 
-## 音色データのエキスポートについて
+## 音色データのエキスポートについて / Timbre (Voice) Data Export
 
 ---
 
