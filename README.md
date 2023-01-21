@@ -21,6 +21,12 @@ MDXVVxxx.ZIP をダウンロードして展開し、MDXVV.X をパスの通っ�
 
 MXDRV の常駐は必須です。
 
+MXP.X (標準MDX再生コマンド) は MXDRV の本体パッケージに含まれています。X68000 LIBRARY から入手してください。
+http://retropc.net/x68000/software/sound/mxdrv/mxdrv16/
+
+ただし、MXDRV ドライバ本体は上記のものではなく 68030 対応版 (MXDRV30) の利用をお勧めします。こちらも X68000 LIBRARY から入手できます。
+http://retropc.net/x68000/software/sound/mxdrv/mxdrv30/
+
 ---
 
 ## 起動方法 / How To Start
