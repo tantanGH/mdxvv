@@ -5,11 +5,11 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 注意：現在開発中につきまだバイナリ配布パッケージは作っていません。この説明書きだけになります。
 
-![](images/mdxvv1.png)
+<img src='images/mdxvv1.png' width='578'/>
 
 ---
 
-## インストール / Install
+## Install / インストール
 
 MDXVVxxx.ZIP をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
@@ -31,7 +31,7 @@ http://retropc.net/x68000/software/sound/mxdrv/mxdrv30/
 
 ---
 
-## 起動方法 / How To Start
+## How To Start / 起動方法
 
     MDXVV [options] [mdx-directory-name]
 
@@ -59,7 +59,7 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 
 ---
 
-## 操作方法 / Key Bindings
+## Key Bindings / 操作方法
 
 操作はすべてキーボードで行います。
 
@@ -184,9 +184,30 @@ MDXVVを終了します。
 
 ---
 
-## 音色データのエクスポート / Voice Data Export
+## Voice Data Export / 音色データのエクスポート
 
-to be documented
+音色データが表示されている状態で `x` キーを押すことで、音色データをファイルに書き出すことができます。
+
+<img src='images/mdxvv3.png' width='576'/>
+
+フォーマットは4通り選択できます。
+
+1. MDX
+2. ZMS (Z-MUSIC)
+3. XC
+4. BAS (X-BASIC)
+
+`1`から`4`のいずれかのキーで選択してください。なお、ハードウェアLFO関連パラメータは一切無視されます。
+
+
+<img src='images/mdxvv4.png' width='576'/>
+
+続いて書き出し先のファイル名を直接入力してください。日本語フォルダ・日本語ファイル名は使わないでください。
+
+既に既存のファイルがある場合は確認を求められます。
+
+
+NOTE: 抽出した音色データの利用については
 
 ---
 
@@ -206,7 +227,7 @@ to be documented
   * [XEiJ](https://stdkmd.net/xeij/) Thanks to M.Kamadaさん
 
 * 実機
-  * SHARP X68030 HD (CZ-510C)
+  * SHARP X68030 (CZ-510C)
   * DELL P2314H モニタ
 
 * 書籍
@@ -216,6 +237,22 @@ to be documented
 * その他
   * [ChatGPT](https://openai.com/blog/chatgpt/)
 
-![](images/mdxvv2.jpeg)
+--
+
+<img src='images/mdxvv2.jpeg' width='806'/>
+
+
+---
+
+## TERMS OF USE / 免責
+
+ここで配布されているソフトウェアを使用したことにより何らかの不具合(システムクラッシュその他)が生じても、一切の責任は負えません。自己責任にてご利用ください。
+アーカイブの再配布は不具合が見つかった時に収拾がつかなくなるのでなるべくご遠慮ください。ただしこの github のリンクの紹介は自由です。
+
+---
+
+## CONTACT / 連絡先
+
+tantan (https://github.com/tantanGH/ twitter:@snakGH)
 
 ---
