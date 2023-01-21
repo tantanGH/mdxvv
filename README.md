@@ -192,6 +192,27 @@ to be documented
 
 ## Special Thanks
 
-to be documented
+開発にあたり以下を利用させて頂きました。ありがとうございました。
 
+* クロスコンパイル
+  * [xdev68k](https://github.com/yosshin4004/xdev68k/) ([gcc 12.2.0に変更](https://github.com/tantanGH/distribution/blob/main/INSTALL_xdev68k_M1Mac.md)) Thanks to ファミべのよっしんさん
+  * HAS060.X on run68mac Thanks to yunkさん / M.Kamadaさん / GOROmanさん
+  * HLK301.X on run68mac Thanks to SALTさん
+  * SHARP XC 2.1 ライブラリ
+  * Microsoft Visual Studio Code
+  * Apple MacBook Air (2020, Apple Silicon, RAM8GB, SSD512GB)
+
+* エミュレータ
+  * [XEiJ](https://stdkmd.net/xeij/) Thanks to M.Kamadaさん
+
+* 実機
+  * SHARP X68030 HD (CZ-510C)
+  * DELL P2314H
+
+* 書籍
+  * [Inside X68000, 桒野雅彦, ソフトバンク, 1992年](https://amzn.asia/d/6IA3urZ)
+  * [サウンドプログラミング入門, 青木直史, 技術評論社, 2013年](https://amzn.asia/d/5Jqxlwu)
+
+* その他
+  * [ChatGPT](https://openai.com/blog/chatgpt/)
 ---
