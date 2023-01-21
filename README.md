@@ -27,6 +27,8 @@ http://retropc.net/x68000/software/sound/mxdrv/mxdrv16/
 ただし、MXDRV ドライバ本体は上記のものではなく 68030 対応版 (MXDRV30) の利用をお勧めします。こちらも X68000 LIBRARY から入手できます。
 http://retropc.net/x68000/software/sound/mxdrv/mxdrv30/
 
+起動ドライブのルートディレクトリに置かれた COMMAND.X へパスが通ってない場合がよくありますので注意してください。
+
 ---
 
 ## 起動方法 / How To Start
