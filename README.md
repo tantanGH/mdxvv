@@ -207,7 +207,7 @@ to be documented
 
 * 実機
   * SHARP X68030 HD (CZ-510C)
-  * DELL P2314H
+  * DELL P2314H モニタ
 
 * 書籍
   * [Inside X68000, 桒野雅彦, ソフトバンク, 1992年](https://amzn.asia/d/6IA3urZ)
@@ -215,4 +215,7 @@ to be documented
 
 * その他
   * [ChatGPT](https://openai.com/blog/chatgpt/)
+
+![](images/mdxvv2.jpeg)
+
 ---
