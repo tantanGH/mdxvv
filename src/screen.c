@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #include "screen.h"
+#include "mdxvv.h"
 
 static void clear_text_screen() {
   struct TXFILLPTR fill = { 0, 0, 0, 768, 512, 0 };
@@ -154,4 +155,344 @@ PANEL* screen_get_panel(SCREEN_HANDLE* scr, int32_t panel_id) {
   }
 
   return panel;
+}
+
+// initialize panels
+void screen_init_panels(SCREEN_HANDLE* scr, MODEL* model) {
+
+  // wait vsync
+  WAIT_VSYNC;
+  WAIT_VBLANK;
+
+  // full canvas
+  PANEL* p = screen_get_panel(scr, PANEL_ALL);
+  p->id = PANEL_ALL;
+  p->x = 0;
+  p->y = 0;
+  p->width = 768;
+  p->height = 512;
+  p->scr = scr;
+  p->model = model;
+
+  panel_clear_all(p);
+
+  // menu panel
+  p = screen_get_panel(scr, PANEL_MENU);
+  p->id = PANEL_MENU;
+  p->x = 0;
+  p->y = 0;
+  p->width = 768;
+  p->height = 12;
+  p->scr = scr;
+  p->model = model;
+
+  panel_put_text(p, 8, 2, COLOR_DARK_PURPLE, FONT_BOLD, "E&XPORT   &QUIT   &HELP");
+  //panel_put_text(p, 8, 0, COLOR_DARK_PURPLE, FONT_BOLD, "&PLAY   &STOP   E&XPORT   &QUIT   &HELP");
+  //panel_put_text_right(p, 0, COLOR_DARK_PURPLE, FONT_REGULAR, "- MDXVV v" VERSION);
+  panel_put_text(p, 288 + 8*1, 2, COLOR_DARK_PURPLE, FONT_BOLD, "MDXVV.X");
+  //panel_put_bitmap(p, 288, 0, LOGO_WIDTH, LOGO_HEIGHT, COLOR_DARK_PURPLE, mdxvv_logo_data);
+  panel_put_text(p, 288 + 8*9, 2, COLOR_DARK_PURPLE, FONT_REGULAR, "v" VERSION);
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
+
+  // connection operation panel
+  p = screen_get_panel(scr, PANEL_CON_OPS);
+  p->id = PANEL_CON_OPS;
+  p->x = 0;
+  p->y = 12;
+  p->width = 160;
+  p->height = 254;
+  p->scr = scr;
+  p->model = model;
+
+  int32_t x_ofs = 16;
+  int32_t y_ofs = 24;
+  int32_t y_step = 16;
+
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "PROG" );
+
+  panel_put_text(p, x_ofs, y_ofs + y_step*0, COLOR_PURPLE, FONT_BOLD, "VOICE");
+  panel_put_text(p, x_ofs, y_ofs + y_step*2, COLOR_PURPLE, FONT_BOLD, "ALG");
+  panel_put_text(p, x_ofs, y_ofs + y_step*3, COLOR_PURPLE, FONT_BOLD, "FL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*4, COLOR_PURPLE, FONT_BOLD, "OP");
+
+  // final wave panel
+  p = screen_get_panel(scr, PANEL_CON_WAVE);
+  p->id = PANEL_CON_WAVE;
+  p->x = 0;
+  p->y = 266;
+  p->width = 160;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
+  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+
+  // operator m1 operation panel
+  p = screen_get_panel(scr, PANEL_M1_OPS);
+  p->id = PANEL_M1_OPS;
+  p->x = 160+152*0;
+  p->y = 12;
+  p->width = 152;
+  p->height = 200;
+  p->scr = scr;
+  p->model = model;
+
+  x_ofs = 16;
+  y_ofs = 24;
+  y_step = 16;
+
+  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP1 ( M1 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M1 / OP1" );
+
+  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
+  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
+  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");
+
+  // operator c1 operation panel
+  p = screen_get_panel(scr, PANEL_C1_OPS);
+  p->id = PANEL_C1_OPS;
+  p->x = 160+152*1;
+  p->y = 12;
+  p->width = 152;
+  p->height = 200;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP2 ( C1 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C1 / OP2" );
+  
+  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
+  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
+  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");
+
+  // operator m2 operation panel
+  p = screen_get_panel(scr, PANEL_M2_OPS);
+  p->id = PANEL_M2_OPS;
+  p->x = 160+152*2;
+  p->y = 12;
+  p->width = 152;
+  p->height = 200;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP3 ( M2 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M2 / OP3" );
+  
+  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
+  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
+  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");  
+
+  // operator c2 operation panel
+  p = screen_get_panel(scr, PANEL_C2_OPS);
+  p->id = PANEL_C2_OPS;
+  p->x = 160+152*3;
+  p->y = 12;
+  p->width = 152;
+  p->height = 200;
+  p->scr = scr;
+  p->model = model;
+
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
+//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
+  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 / OP4" );
+
+  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
+  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
+  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
+  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
+  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
+  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");      
+
+  // operator m1 envelope panel
+  p = screen_get_panel(scr, PANEL_M1_ENV);
+  p->id = PANEL_M1_ENV;
+  p->x = 160+152*0;
+  p->y = 212;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
+  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
+
+  // operator c1 envelope panel
+  p = screen_get_panel(scr, PANEL_C1_ENV);
+  p->id = PANEL_C1_ENV;
+  p->x = 160+152*1;
+  p->y = 212;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
+  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
+
+  // operator m2 envelope panel
+  p = screen_get_panel(scr, PANEL_M2_ENV);
+  p->id = PANEL_M2_ENV;
+  p->x = 160+152*2;
+  p->y = 212;
+  p->width = 152;
+  p->height = 54; 
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
+  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
+
+  // operator c2 envelope panel
+  p = screen_get_panel(scr, PANEL_C2_ENV);
+  p->id = PANEL_C2_ENV;
+  p->x = 160+152*3;
+  p->y = 212;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
+  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
+  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
+
+  // operator m1 wave panel
+  p = screen_get_panel(scr, PANEL_M1_WAVE);
+  p->id = PANEL_M1_WAVE;
+  p->x = 160+152*0;
+  p->y = 266;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+
+  // operator c1 wave panel
+  p = screen_get_panel(scr, PANEL_C1_WAVE);
+  p->id = PANEL_C1_WAVE;
+  p->x = 160+152*1;
+  p->y = 266;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+
+  // operator m2 wave panel
+  p = screen_get_panel(scr, PANEL_M2_WAVE);
+  p->id = PANEL_M2_WAVE;
+  p->x = 160+152*2;
+  p->y = 266;
+  p->width = 152;
+  p->height = 54; 
+  p->scr = scr;
+  p->model = model;
+
+  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+
+  // operator c2 wave panel
+  p = screen_get_panel(scr, PANEL_C2_WAVE);
+  p->id = PANEL_C2_WAVE;
+  p->x = 160+152*3;
+  p->y = 266;
+  p->width = 152;
+  p->height = 54;
+  p->scr = scr;
+  p->model = model;
+
+  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
+  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
+  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
+  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
+  panel_xline(p, -1, p->height-1, p->width+1, COLOR_DARK_PURPLE);
+
+  // mdx play panel
+  p = screen_get_panel(scr, PANEL_MDX_PLAY);
+  p->id = PANEL_MDX_PLAY;
+  p->x = 0;
+  p->y = 320;
+  p->width = 768;
+  p->height = 22;
+  p->scr = scr;
+  p->model = model;
+
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
+
+  // mdx list panel
+  p = screen_get_panel(scr, PANEL_MDX_LIST);
+  p->id = PANEL_MDX_LIST;
+  p->x = 0;
+  p->y = 342;
+  p->width = 768;
+  p->height = 114;
+  p->scr = scr;
+  p->model = model;
+
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
+
+  // message panel
+  p = screen_get_panel(scr, PANEL_MESSAGE);
+  p->id = PANEL_MESSAGE;
+  p->x = 0;
+  p->y = 456;
+  p->width = 768;
+  p->height = 56;
+  p->scr = scr;
+  p->model = model;
+
+  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);  
 }

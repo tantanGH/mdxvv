@@ -36,13 +36,13 @@ CFLAGS = $(COMMON_FLAGS) -Wno-builtin-declaration-mismatch -fcall-used-d2 -fcall
     -fexec-charset=cp932 -fverbose-asm -fno-defer-pop
 
 # *.c ソースファイル
-C_SRCS = memory.c mxdrv.c voice.c mdx.c opm.c screen.c panel.c main.c
+C_SRCS = memory.c mxdrv.c voice.c mdx.c opm.c screen.c panel.c model.c main.c
 
 # *.s ソースファイル
 ASM_SRCS =
 
 # *.h source files
-HEADER_SRCS = memory.h mxdrv.h voice.h mdx.h opm.h diagram.h panel.h screen.h model.h keyboard.h mdxvv.h
+HEADER_SRCS = keyboard.h memory.h mxdrv.h voice.h mdx.h opm.h diagram.h panel.h screen.h model.h mdxvv.h
 
 # リンク対象のライブラリファイル
 LIBS =\
@@ -50,6 +50,7 @@ LIBS =\
 	${XDEV68K_DIR}/lib/xc/DOSLIB.L \
 	${XDEV68K_DIR}/lib/xc/IOCSLIB.L \
 	${XDEV68K_DIR}/lib/xc/FLOATFNC.L \
+	${XDEV68K_DIR}/lib/keepchk/KEEPCHK.LIB \
 	${XDEV68K_DIR}/lib/m68k_elf/m68000/libgcc.a
 
 # 中間ファイル生成用ディレクトリ

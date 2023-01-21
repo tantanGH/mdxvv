@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <iocslib.h>
 #include "panel.h"
+#include "model.h"
 
 //#define GVRAM             ((volatile uint16_t*)0xC00000)
 #define TVRAM_PAGE0       ((volatile uint16_t*)0xE00000)
@@ -85,5 +86,6 @@ void screen_init(SCREEN_HANDLE* scr, int32_t preserve_graphic);
 void screen_reset(SCREEN_HANDLE* scr, int32_t preserve_graphic);
 void screen_init_font(SCREEN_HANDLE* scr);
 PANEL* screen_get_panel(SCREEN_HANDLE* scr, int32_t panel_id);
+void screen_init_panels(SCREEN_HANDLE* scr, MODEL* m);
 
 #endif

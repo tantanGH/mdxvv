@@ -134,3 +134,17 @@ uint16_t mxdrv_m_stat() {
 
   return reg_d0 & 0xFFFF;
 }
+
+uint16_t mxdrv_m_stat2() {
+
+	register uint32_t reg_d0 asm ("d0") = 0x14;    // M_STAT2
+
+  asm volatile (
+    "trap #4\n"         // trap #4
+    : "+r"  (reg_d0)    // input & output operand
+    :                   // input operand
+    :                   // clobbered register
+  );
+
+  return reg_d0 & 0xFFFF;
+}

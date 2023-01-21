@@ -16,387 +16,6 @@
 #include "mxdrv.h"
 #include "memory.h"
 
-// create model
-static void create_model(MODEL* m) {
-
-  m->voice_set = NULL;
-  m->voice_index = 0;
-
-  m->list_index = 0;
-  m->list_view_size = 7;
-  m->list_view_index = 0;
-  m->list_sort_order = SORT_ORDER_NORMAL;
-
-  m->message_index = 0;
-  m->message_view_size = 5;
-
-  m->current_mdx_index = -1;
-  m->current_mdx_start_time = 0;
-
-  m->auto_play_mode = 1;
-  m->auto_fadeout_time = DEFAULT_FADEOUT_TIME;
-
-  m->use_high_memory = 0;
-
-  OPM_WAVE* ow = &(m->opm_wave);
-  ow->num_samples = ADSR_WIDTH;
-  ow->available = 0;
-  ow->voice = NULL;
-
-  ow->adsr_m1 = m->adsr_m1;
-  ow->adsr_c1 = m->adsr_c1;
-  ow->adsr_m2 = m->adsr_m2;
-  ow->adsr_c2 = m->adsr_c2;
-  ow->wave_m1 = m->wave_m1;
-  ow->wave_c1 = m->wave_c1;
-  ow->wave_m2 = m->wave_m2;
-  ow->wave_c2 = m->wave_c2;
-  ow->wave_total = m->wave_total;
-
-  m->original_current_drive = CURDRV();
-  getcwd(m->original_current_dir, MAX_PATH_LEN);
-}
-
-// create view
-static void create_view(SCREEN_HANDLE* scr, MODEL* model) {
-
-  // wait vsync
-  WAIT_VSYNC;
-  WAIT_VBLANK;
-
-  // full canvas
-  PANEL* p = screen_get_panel(scr, PANEL_ALL);
-  p->id = PANEL_ALL;
-  p->x = 0;
-  p->y = 0;
-  p->width = 768;
-  p->height = 512;
-  p->scr = scr;
-  p->model = model;
-
-  panel_clear_all(p);
-
-  // menu panel
-  p = screen_get_panel(scr, PANEL_MENU);
-  p->id = PANEL_MENU;
-  p->x = 0;
-  p->y = 0;
-  p->width = 768;
-  p->height = 12;
-  p->scr = scr;
-  p->model = model;
-
-  panel_put_text(p, 8, 2, COLOR_DARK_PURPLE, FONT_BOLD, "E&XPORT   &QUIT   &HELP");
-  //panel_put_text(p, 8, 0, COLOR_DARK_PURPLE, FONT_BOLD, "&PLAY   &STOP   E&XPORT   &QUIT   &HELP");
-  //panel_put_text_right(p, 0, COLOR_DARK_PURPLE, FONT_REGULAR, "- MDXVV v" VERSION);
-  panel_put_text(p, 288 + 8*1, 2, COLOR_DARK_PURPLE, FONT_BOLD, "MDXVV.X");
-  //panel_put_bitmap(p, 288, 0, LOGO_WIDTH, LOGO_HEIGHT, COLOR_DARK_PURPLE, mdxvv_logo_data);
-  panel_put_text(p, 288 + 8*9, 2, COLOR_DARK_PURPLE, FONT_REGULAR, "v" VERSION);
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
-
-  // connection operation panel
-  p = screen_get_panel(scr, PANEL_CON_OPS);
-  p->id = PANEL_CON_OPS;
-  p->x = 0;
-  p->y = 12;
-  p->width = 160;
-  p->height = 254;
-  p->scr = scr;
-  p->model = model;
-
-  int32_t x_ofs = 16;
-  int32_t y_ofs = 24;
-  int32_t y_step = 16;
-
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "PROG" );
-
-  panel_put_text(p, x_ofs, y_ofs + y_step*0, COLOR_PURPLE, FONT_BOLD, "VOICE");
-  panel_put_text(p, x_ofs, y_ofs + y_step*2, COLOR_PURPLE, FONT_BOLD, "ALG");
-  panel_put_text(p, x_ofs, y_ofs + y_step*3, COLOR_PURPLE, FONT_BOLD, "FL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*4, COLOR_PURPLE, FONT_BOLD, "OP");
-
-  // final wave panel
-  p = screen_get_panel(scr, PANEL_CON_WAVE);
-  p->id = PANEL_CON_WAVE;
-  p->x = 0;
-  p->y = 266;
-  p->width = 160;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
-  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
-
-  // operator m1 operation panel
-  p = screen_get_panel(scr, PANEL_M1_OPS);
-  p->id = PANEL_M1_OPS;
-  p->x = 160+152*0;
-  p->y = 12;
-  p->width = 152;
-  p->height = 200;
-  p->scr = scr;
-  p->model = model;
-
-  x_ofs = 16;
-  y_ofs = 24;
-  y_step = 16;
-
-  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP1 ( M1 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M1 / OP1" );
-
-  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
-  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
-  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");
-
-  // operator c1 operation panel
-  p = screen_get_panel(scr, PANEL_C1_OPS);
-  p->id = PANEL_C1_OPS;
-  p->x = 160+152*1;
-  p->y = 12;
-  p->width = 152;
-  p->height = 200;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP2 ( C1 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C1 / OP2" );
-  
-  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
-  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
-  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");
-
-  // operator m2 operation panel
-  p = screen_get_panel(scr, PANEL_M2_OPS);
-  p->id = PANEL_M2_OPS;
-  p->x = 160+152*2;
-  p->y = 12;
-  p->width = 152;
-  p->height = 200;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP3 ( M2 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "M2 / OP3" );
-  
-  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
-  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
-  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");  
-
-  // operator c2 operation panel
-  p = screen_get_panel(scr, PANEL_C2_OPS);
-  p->id = PANEL_C2_OPS;
-  p->x = 160+152*3;
-  p->y = 12;
-  p->width = 152;
-  p->height = 200;
-  p->scr = scr;
-  p->model = model;
-
-  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
-//  panel_box(p, -1, -1, p->width+1, p->height+1, COLOR_DARK_PURPLE);
-//  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "OP4 ( C2 )" );
-  panel_put_text_center(p, 4, COLOR_PURPLE, FONT_BOLD, "C2 / OP4" );
-
-  panel_put_text(p, x_ofs, y_ofs + y_step*0,  COLOR_PURPLE, FONT_BOLD, "AR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*1,  COLOR_PURPLE, FONT_BOLD, "DR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*2,  COLOR_PURPLE, FONT_BOLD, "SR");
-  panel_put_text(p, x_ofs, y_ofs + y_step*3,  COLOR_PURPLE, FONT_BOLD, "RR"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*4,  COLOR_PURPLE, FONT_BOLD, "SL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*5,  COLOR_PURPLE, FONT_BOLD, "TL");
-  panel_put_text(p, x_ofs, y_ofs + y_step*6,  COLOR_PURPLE, FONT_BOLD, "KS");
-  panel_put_text(p, x_ofs, y_ofs + y_step*7,  COLOR_PURPLE, FONT_BOLD, "MUL"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*8,  COLOR_PURPLE, FONT_BOLD, "DT1"); 
-  panel_put_text(p, x_ofs, y_ofs + y_step*9,  COLOR_PURPLE, FONT_BOLD, "DT2");
-  panel_put_text(p, x_ofs, y_ofs + y_step*10, COLOR_PURPLE, FONT_BOLD, "AME");      
-
-  // operator m1 envelope panel
-  p = screen_get_panel(scr, PANEL_M1_ENV);
-  p->id = PANEL_M1_ENV;
-  p->x = 160+152*0;
-  p->y = 212;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
-  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
-  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
-
-  // operator c1 envelope panel
-  p = screen_get_panel(scr, PANEL_C1_ENV);
-  p->id = PANEL_C1_ENV;
-  p->x = 160+152*1;
-  p->y = 212;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
-  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
-  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
-
-  // operator m2 envelope panel
-  p = screen_get_panel(scr, PANEL_M2_ENV);
-  p->id = PANEL_M2_ENV;
-  p->x = 160+152*2;
-  p->y = 212;
-  p->width = 152;
-  p->height = 54; 
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
-  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
-  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
-
-  // operator c2 envelope panel
-  p = screen_get_panel(scr, PANEL_C2_ENV);
-  p->id = PANEL_C2_ENV;
-  p->x = 160+152*3;
-  p->y = 212;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "ENVELOPE" );
-  panel_xline(p, 19, 16+35, 114, COLOR_DARK_PURPLE);
-  panel_yline(p, 19, 10, 41, COLOR_DARK_PURPLE);
-  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
-  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
-
-  // operator m1 wave panel
-  p = screen_get_panel(scr, PANEL_M1_WAVE);
-  p->id = PANEL_M1_WAVE;
-  p->x = 160+152*0;
-  p->y = 266;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
-  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
-
-  // operator c1 wave panel
-  p = screen_get_panel(scr, PANEL_C1_WAVE);
-  p->id = PANEL_C1_WAVE;
-  p->x = 160+152*1;
-  p->y = 266;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
-  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
-
-  // operator m2 wave panel
-  p = screen_get_panel(scr, PANEL_M2_WAVE);
-  p->id = PANEL_M2_WAVE;
-  p->x = 160+152*2;
-  p->y = 266;
-  p->width = 152;
-  p->height = 54; 
-  p->scr = scr;
-  p->model = model;
-
-  panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
-  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
-
-  // operator c2 wave panel
-  p = screen_get_panel(scr, PANEL_C2_WAVE);
-  p->id = PANEL_C2_WAVE;
-  p->x = 160+152*3;
-  p->y = 266;
-  p->width = 152;
-  p->height = 54;
-  p->scr = scr;
-  p->model = model;
-
-  //panel_box(p, -1, -1, p->width + 1, p->height + 1, COLOR_DARK_PURPLE);
-  //panel_put_text_center(p, 4, COLOR_DARK_PURPLE, FONT_BOLD, "WAVEFORM" );
-  panel_xline(p, 19, 32, 114, COLOR_DARK_PURPLE);
-  panel_xline(p, -1, -1, p->width+1, COLOR_DARK_PURPLE);
-  panel_yline(p, -1, -1, p->height+1, COLOR_DARK_PURPLE);
-  panel_xline(p, -1, p->height-1, p->width+1, COLOR_DARK_PURPLE);
-
-  // mdx play panel
-  p = screen_get_panel(scr, PANEL_MDX_PLAY);
-  p->id = PANEL_MDX_PLAY;
-  p->x = 0;
-  p->y = 320;
-  p->width = 768;
-  p->height = 22;
-  p->scr = scr;
-  p->model = model;
-
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
-
-  // mdx list panel
-  p = screen_get_panel(scr, PANEL_MDX_LIST);
-  p->id = PANEL_MDX_LIST;
-  p->x = 0;
-  p->y = 342;
-  p->width = 768;
-  p->height = 114;
-  p->scr = scr;
-  p->model = model;
-
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);
-
-  // message panel
-  p = screen_get_panel(scr, PANEL_MESSAGE);
-  p->id = PANEL_MESSAGE;
-  p->x = 0;
-  p->y = 456;
-  p->width = 768;
-  p->height = 56;
-  p->scr = scr;
-  p->model = model;
-
-  panel_xline(p, 0, p->height-1, p->width, COLOR_DARK_PURPLE);  
-}
-
 // mdx voice set export event helper
 static void export_voice_set(SCREEN_HANDLE* scr, MODEL* m) {
 
@@ -664,10 +283,21 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   // graphic preservation
   int32_t preserve_graphic = 0;
 
-  // create MVC model instance
-  static MODEL model = { 0 };
-  MODEL* m = &model;
-  create_model(m);
+  printf("stat=%04X,stat2=%04X\n",mxdrv_m_stat(),mxdrv_m_stat2());
+
+  // original current drive and directory preservation
+  int32_t original_current_drive = CURDRV();
+  static uint8_t original_current_dir[ MAX_PATH_LEN ];
+  getcwd(original_current_dir, MAX_PATH_LEN);
+
+  // high memory use
+  int32_t use_high_memory = 0;
+
+  // disable auto play
+  int32_t no_auto_play = 0;
+
+  // auto fade out timeout
+  int32_t auto_fadeout_time = 210;
 
   // argument check
   static uint8_t mdx_dir[ MAX_PATH_LEN ];
@@ -677,18 +307,17 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
       if (argv[i][1] == 'g') {
         preserve_graphic = 1;
       } else if (argv[i][1] == 'u') {
-        m->use_high_memory = 1;
+        use_high_memory = 1;
       } else if (argv[i][1] == 'a') {
-        m->auto_play_mode = 0;
-      } else if (argv[i][1] == 'u') {
-        m->use_high_memory = 1;
+        no_auto_play = 1;
       } else if (argv[i][1] == 'f' && strlen(argv[i]) >= 3) {
-        m->auto_fadeout_time = atoi(argv[i]+2);
+        auto_fadeout_time = atoi(argv[i]+2);
       } else if (argv[i][1] == 'h') {
         show_command_help_message();
         goto exit;
       } else {
-        printf("error: unknown option.");
+        printf("error: unknown option. (%s)\n", argv[i]);
+        show_command_help_message();
         goto exit;
       }
       continue;
@@ -700,40 +329,28 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
   // supervisor mode
   B_SUPER(0);
 
-  // create screen instance
-  static SCREEN_HANDLE screen_handle = { 0 };
-  SCREEN_HANDLE* scr = &screen_handle;
+  // initialize MVC model instance
+  MODEL* m = (MODEL*)malloc_himem(sizeof(MODEL), m->use_high_memory);
+  if (m == NULL) {
+    printf("error: memory allocation error for model.\n");
+    goto finally;
+  }
+  m->use_high_memory = use_high_memory;
+  model_init(m);
+
+  // overwrite auto play parameters with command line args
+  m->auto_play_mode = no_auto_play ? 0 : 1;
+  m->auto_fadeout_time = auto_fadeout_time;
+
+  // initialize MVC view instances
+  SCREEN_HANDLE* scr = (SCREEN_HANDLE*)malloc_himem(sizeof(SCREEN_HANDLE), m->use_high_memory);
+  if (scr == NULL) {
+    printf("error: memory allocation error for screen handle.\n");
+    goto finally;
+  }
   screen_init(scr, preserve_graphic);
   screen_init_font(scr);
-
-  // if high memory mode, copy model and screen instances
-  if (m->use_high_memory) {
-
-    // new model instance on high memory
-    MODEL* m2 = (MODEL*)malloc_himem(sizeof(MODEL), m->use_high_memory);
-    memcpy(m2, m, sizeof(MODEL));
-    m = m2;
-
-    // need to remap because now we use high memory
-    OPM_WAVE* ow = &(m->opm_wave);
-    ow->adsr_m1 = m->adsr_m1;
-    ow->adsr_c1 = m->adsr_c1;
-    ow->adsr_m2 = m->adsr_m2;
-    ow->adsr_c2 = m->adsr_c2;
-    ow->wave_m1 = m->wave_m1;
-    ow->wave_c1 = m->wave_c1;
-    ow->wave_m2 = m->wave_m2;
-    ow->wave_c2 = m->wave_c2;
-    ow->wave_total = m->wave_total;
-
-    // new screen instance on high memory
-    SCREEN_HANDLE* scr2 = (SCREEN_HANDLE*)malloc_himem(sizeof(SCREEN_HANDLE), m->use_high_memory);
-    memcpy(scr2, scr, sizeof(SCREEN_HANDLE));
-    scr = scr2;
-  }
-
-  // create MVC view
-  create_view(scr, m);
+  screen_init_panels(scr, m);
 
   // opening message
   PANEL* panel_message = screen_get_panel(scr, PANEL_MESSAGE);
@@ -800,7 +417,7 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
         case KEY_SCAN_CODE_ESC:
         case KEY_SCAN_CODE_Q:
           // quit mdxvv
-          goto quit;
+          goto finally;
 
         case KEY_SCAN_CODE_UP:
         case KEY_SCAN_CODE_K:
@@ -1116,7 +733,7 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
             m->list_index = 0;
             m->list_view_index = 0;
             m->message_index = 0;
-            create_view(scr, m);
+            screen_init_panels(scr, m);
             panel_mdx_play_show_path(panel_mdx_play);
             panel_mdx_list_refresh(panel_mdx_list);
             //panel_mdx_play_show_title(panel_mdx_play);    // show playing MDX data title
@@ -1169,31 +786,39 @@ int32_t main(int32_t argc, uint8_t* argv[]) {
     }
   }
 
-quit:
+finally:
 
   // close opened voice set if exists
-  if (m->voice_set != NULL) {
+  if (m != NULL && m->voice_set != NULL) {
     voice_set_close(m->voice_set, m->use_high_memory);
   }
 
   // close MDX list if opened
-  if (m->mdx_list != NULL) {
+  if (m != NULL && m->mdx_list != NULL) {
     mdx_list_close(m->mdx_list, m->use_high_memory);
   }
 
   // reset screen
-  screen_reset(scr, preserve_graphic);
-
-  // reclaim screen and model high memory objs
-  if (m->use_high_memory) {
+  if (scr != NULL) {
+    screen_reset(scr, preserve_graphic);
+  }
+ 
+  // reclaim screen memory
+  if (scr != NULL) {
     free_himem(scr, m->use_high_memory);
+    scr = NULL;
+  }
+
+  // reclaim model memory
+  if (m != NULL) {
     free_himem(m, m->use_high_memory);
+    m = NULL;
   }
 
   // resume current drive and directory
-  CHGDRV(m->original_current_drive);
-  CHDIR(m->original_current_dir);
- 
+  CHGDRV(original_current_drive);
+  CHDIR(original_current_dir);
+
   // flush key buffer
   while (B_KEYSNS() != 0) {
     B_KEYINP();
