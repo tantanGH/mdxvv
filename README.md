@@ -170,9 +170,13 @@ MDXVVを終了します。
 
 自動演奏をON/OFFします。
 
+- `S`
+
+シャッフルモードをON/OFFします。大文字 `S` (`SHIFT+s`) です。
+
 - `M`
 
-MMDSP を使って現在のカーソル位置の曲を演奏します。MMDSP を終了させると MDXVV に戻ります。
+大文字 `M` (`SHIFT+m`)です。MMDSP を使って現在のカーソル位置の曲を演奏します。MMDSP を終了させると MDXVV に戻ります。
 
 - `x`
 
@@ -180,7 +184,7 @@ MMDSP を使って現在のカーソル位置の曲を演奏します。MMDSP �
 
 ---
 
-## 音色データのエキスポートについて / Voice Data Export
+## 音色データのエクスポート / Voice Data Export
 
 to be documented
 
