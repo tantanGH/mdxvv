@@ -19,7 +19,7 @@ MDXVVxxx.ZIP をダウンロードして展開し、MDXVV.X をパスの通っ�
 * MXP.X
 * MMDSP.r (オプション)
 
-MXDRV の常駐は必須です。
+MXDRV 2.06+16 の常駐は必須です。常駐していない場合はエラーメッセージが出て MDXVV は起動しません。
 
 MXP.X (標準MDX再生コマンド) は MXDRV の本体パッケージに含まれています。X68000 LIBRARY から入手してください。
 http://retropc.net/x68000/software/sound/mxdrv/mxdrv16/
