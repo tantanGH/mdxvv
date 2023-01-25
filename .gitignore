@@ -2,4 +2,6 @@ src
 src/_build
 src/_work
 src/_test
+src/opmtest.c
+src/paneltest.c
 .DS_Store
