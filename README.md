@@ -7,8 +7,6 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 <img src='images/mdxvv1.png' width='578'/>
 
-<img src='images/mdxvv5.gif'/>
-
 ---
 
 ## Install / インストール
@@ -73,6 +71,11 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 * `-A`
 
 波形アニメーション表示をOFFにして起動します。起動後も `A` キーで ON/OFF を切り替えることができます。
+
+
+波形アニメーション例：
+
+<img src='images/mdxvv5.gif'/>
 
 ---
 
