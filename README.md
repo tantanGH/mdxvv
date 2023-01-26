@@ -21,7 +21,7 @@ PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
 * http://retropc.net/x68000/software/sound/adpcm/pcm8/
 * http://retropc.net/x68000/software/sound/mxdrv/
 
-画面の描画にIOCSコールを多用しているので、HIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
+画面の描画にIOCSコールを多用しているので、YuNK氏のHIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
 
 * http://retropc.net/x68000/software/system/iocs/hiocs/
 
