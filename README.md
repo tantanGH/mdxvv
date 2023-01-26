@@ -13,13 +13,15 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 MDXVVxxx.ZIP をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
-PCM8 と MXDRV 2.06+16 の常駐が必要です。
-MXDRVが常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
+PCM8とMXDRVの常駐が必要です。
+MXDRVバージョン2.06+16が常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
 
-MXDRVは68030対応版(MXDRV30)の利用をお勧めします。X68000 LIBRARYから入手できます。
-http://retropc.net/x68000/software/sound/mxdrv/mxdrv30/
+PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
 
-MMDSPを補助的に利用することが可能です。この場合は以下のコマンドにパスを通しておいてください。
+* http://retropc.net/x68000/software/sound/adpcm/pcm8/
+* http://retropc.net/x68000/software/sound/mxdrv/
+
+MMDSPを補助的に利用することが可能です(`M`キー)。この場合は以下のコマンドにパスを通しておいてください。
 
 * MMDSP.r
 * COMMAND.X
@@ -27,6 +29,7 @@ MMDSPを補助的に利用することが可能です。この場合は以下の
 起動ドライブのルートディレクトリに置かれた COMMAND.X へパスが通ってない場合がよくありますので注意してください。
 
 画面の描画にIOCSコールを多用しているので、HIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
+
 ---
 
 ## How To Start / 起動方法
@@ -43,6 +46,8 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 * `-g`
 
 グラフィック画面の初期化を行いません。壁紙画像を維持したい場合などに。MDXVV自体はテキスト0,1プレーンのみを使用します。
+
+<img src='images/mdxvv6.png' width='576'/>
 
 <br/>
 
