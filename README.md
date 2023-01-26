@@ -21,13 +21,6 @@ PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
 * http://retropc.net/x68000/software/sound/adpcm/pcm8/
 * http://retropc.net/x68000/software/sound/mxdrv/
 
-MMDSPを補助的に利用することが可能です(`M`キー)。この場合は以下のコマンドにパスを通しておいてください。
-
-* MMDSP.r
-* COMMAND.X
-
-起動ドライブのルートディレクトリに置かれた COMMAND.X へパスが通ってない場合がよくありますので注意してください。
-
 画面の描画にIOCSコールを多用しているので、HIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
 
 ---
@@ -258,7 +251,7 @@ MDXVVを終了します。
 
 - `M`
 
-大文字 `M` (`SHIFT+m`)です。MMDSP を起動します。MMDSP を終了させると MDXVV に戻ります。
+大文字 `M` (`SHIFT+m`)です。MMDSP を起動します。MMDSP を終了させると MDXVV に戻ります。MMDSP.r および COMMAND.X にパスを通しておく必要があります。
 
 <br/>
 
@@ -316,6 +309,7 @@ MDXVVを終了します。
 
 * 実機
   * SHARP X68030 (CZ-510C)
+  * 満開製作所 060turbo
   * DELL P2314H モニタ
 
 * 書籍
@@ -323,6 +317,7 @@ MDXVVを終了します。
   * [サウンドプログラミング入門, 青木直史, 技術評論社, 2013年](https://amzn.asia/d/5Jqxlwu)
 
 * その他
+  * [MMDSP](https://github.com/gaolay/MMDSP/)
   * [ChatGPT](https://openai.com/blog/chatgpt/)
 
 
