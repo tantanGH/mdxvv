@@ -74,6 +74,13 @@ MDXファイルそのものを指定しても構いません。その場合は�
 
 <img src='images/mdxvv5.gif'/>
 
+
+M.Kamadaさんの `060loadhigh.X` による060turbo/PhantomXハイメモリ上での実行に対応しています。
+
+    060loadhigh mdxvv
+
+* http://retropc.net/x68000/software/hardware/060turbo/060loadhigh/
+
 ---
 
 ## Key Bindings / 操作方法
