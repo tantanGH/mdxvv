@@ -319,7 +319,7 @@ MDXVVを終了します。
   * [XEiJ](https://stdkmd.net/xeij/) Thanks to M.Kamadaさん
 
 * 実機
-  * SHARP X68030 (CZ-510C)
+  * SHARP X68030
   * 満開製作所 060turbo
   * 060turbo 関連ソフトウェア Thanks to M.Kamadaさん
   * DELL P2314H モニタ
