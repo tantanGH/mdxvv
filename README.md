@@ -21,7 +21,7 @@ PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
 * http://retropc.net/x68000/software/sound/adpcm/pcm8/
 * http://retropc.net/x68000/software/sound/mxdrv/
 
-画面の描画にIOCSコールを多用しているので、YuNK氏のHIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
+画面の描画にIOCSコールを多用しているので、YuNKさんのHIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
 
 * http://retropc.net/x68000/software/system/iocs/hiocs/
 
@@ -35,7 +35,7 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 指定が無い場合はカレントディレクトリが指定されたものとして扱います。
 MDXファイルそのものを指定しても構いません。その場合はそのMDXファイルがあるフォルダからの起動になります。
 
-M.Kamada氏の `060loadhigh.x` による 060turbo / PhantomX ハイメモリ上での実行にも対応しています。
+M.Kamadaさんの `060loadhigh.x` による 060turbo / PhantomX ハイメモリ上での実行にも対応しています。
 
     060loadhigh mdxvv [options]
 
@@ -309,7 +309,7 @@ MDXVVを終了します。
 
 * クロスコンパイル
   * [xdev68k](https://github.com/yosshin4004/xdev68k/) ([gcc 12.2.0に変更](https://github.com/tantanGH/distribution/blob/main/INSTALL_xdev68k_M1Mac.md)) Thanks to ファミべのよっしんさん
-  * HAS060.X on run68mac Thanks to yunkさん / M.Kamadaさん / GOROmanさん
+  * HAS060.X on run68mac Thanks to YuNKさん / M.Kamadaさん / GOROmanさん
   * HLK301.X on run68mac Thanks to SALTさん
   * SHARP XC 2.1 ライブラリ
   * Microsoft Visual Studio Code
@@ -321,6 +321,7 @@ MDXVVを終了します。
 * 実機
   * SHARP X68030 (CZ-510C)
   * 満開製作所 060turbo
+  * 060turbo 関連ソフトウェア Thanks to M.Kamadaさん
   * DELL P2314H モニタ
 
 * 書籍
