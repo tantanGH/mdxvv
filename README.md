@@ -35,7 +35,7 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 指定が無い場合はカレントディレクトリが指定されたものとして扱います。
 MDXファイルそのものを指定しても構いません。その場合はそのMDXファイルがあるフォルダからの起動になります。
 
-M.Kamada氏の `060loadhigh.X` による060turbo/PhantomXハイメモリ上での実行にも対応しています。
+M.Kamada氏の `060loadhigh.x` による060turbo/PhantomXハイメモリ上での実行にも対応しています。
 
     060loadhigh mdxvv [options]
 
