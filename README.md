@@ -29,11 +29,18 @@ PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
 
 ## How To Start / 起動方法
 
-    MDXVV [options] [mdx-directory-name]
+    mdxvv [options] [mdx-directory-name]
 
 MDXファイルが格納されているフォルダを指定して起動します。
 指定が無い場合はカレントディレクトリが指定されたものとして扱います。
 MDXファイルそのものを指定しても構いません。その場合はそのMDXファイルがあるフォルダからの起動になります。
+
+M.Kamadaさんの `060loadhigh.X` による060turbo/PhantomXハイメモリ上での実行にも対応しています。
+
+    060loadhigh mdxvv [options]
+
+* http://retropc.net/x68000/software/hardware/060turbo/060loadhigh/
+
 
 オプションとして以下の指定が可能です。
 
@@ -73,13 +80,6 @@ MDXファイルそのものを指定しても構いません。その場合は�
 波形アニメーション例：
 
 <img src='images/mdxvv5.gif'/>
-
-
-M.Kamadaさんの `060loadhigh.X` による060turbo/PhantomXハイメモリ上での実行に対応しています。
-
-    060loadhigh mdxvv
-
-* http://retropc.net/x68000/software/hardware/060turbo/060loadhigh/
 
 ---
 
