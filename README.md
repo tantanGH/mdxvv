@@ -304,6 +304,8 @@ MDXVVを終了します。
     SET MDXVV_MAG=MAGH.X /X /E /L3 /V40
     SET MDXVV_PNG=PNGEX.X -c -n -v40
 
+それぞれのローダと`COMMAND.X`にパスが通っている必要があります。
+
 ---
 
 ## Limitations / 制約事項
