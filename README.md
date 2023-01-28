@@ -301,7 +301,7 @@ MDXVVを終了します。
 
 スキャン対象となるディレクトリ内に、`MDXVV_BG.MAG` または `MDXVV_BG.PNG` という名前で画像ファイルが置かれていて、かつ環境変数でローダが設定されている場合は子プロセスでローダを呼び出して背景画像として表示します。
 
-    SET MDXVV_MAG=MAGH.X /X /E /L3 /V40
+    SET MDXVV_MAG=MAGH.X /O /X /E /L3 /V40
     SET MDXVV_PNG=PNGEX.X -c -n -v40
 
 それぞれのローダと`COMMAND.X`にパスが通っている必要があります。
