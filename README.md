@@ -318,7 +318,7 @@ MDXVVを終了します。
 
 ## Special Thanks
 
-開発にあたり以下のソフトウェア・ハードウェア・環境を利用させて頂きました。ありがとうございます。
+開発にあたり以下のソフトウェア・ハードウェア・リソースを利用させて頂きました。この場を借りてお礼申し上げます。
 
 * クロスコンパイル
   * [xdev68k](https://github.com/yosshin4004/xdev68k/) ([gcc 12.2.0に変更](https://github.com/tantanGH/distribution/blob/main/INSTALL_xdev68k_M1Mac.md)) Thanks to ファミべのよっしんさん
