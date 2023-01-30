@@ -13,7 +13,7 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 ## Install / インストール
 
-[MDXVV060.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV060.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
+[MDXVV061.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV061.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
 PCM8とMXDRVの常駐が必要です。
 MXDRVバージョン2.06+16が常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
