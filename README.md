@@ -308,6 +308,8 @@ MDXVVを終了します。
 
 それぞれのローダと`COMMAND.X`にパスが通っている必要があります。
 
+<img src='images/mdxvv6.png'/>
+
 ---
 
 ## Limitations / 制約事項
