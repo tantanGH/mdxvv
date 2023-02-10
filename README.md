@@ -1,7 +1,7 @@
-# MDXVV.X (β版)
+# MDXVV.X
 MDX Voice Viewer for X680x0/Human68k
 
-MDXセレクタ＆プレーヤー＆音色データビュワー＆音色データ抽出ソフトのβ版です。
+MDXセレクタ＆プレーヤー＆音色データビュワー＆音色データ抽出ソフトです。
 
 <img src='images/mdxvv1.png' width='578'/>
 
