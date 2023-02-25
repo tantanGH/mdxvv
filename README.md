@@ -13,7 +13,7 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 ## Install / インストール
 
-[MDXVV061.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV061.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
+[MDXVV070.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV070.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
 PCM8とMXDRVの常駐が必要です。
 MXDRVバージョン2.06+16が常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
@@ -37,7 +37,7 @@ MDXファイルが格納されているフォルダを指定して起動しま�
 指定が無い場合はカレントディレクトリが指定されたものとして扱います。
 MDXファイルそのものを指定しても構いません。その場合はそのMDXファイルがあるフォルダからの起動になります。
 
-M.Kamadaさんの 060loadhigh.x による 060turbo / PhantomX ハイメモリ上での実行にも対応しています。(060turbo.sysの組み込みが必要)
+M.Kamadaさんの 060loadhigh.x による 060turbo ハイメモリ上での実行にも対応しています。(060turbo.sys -xmの組み込みが必要)
 
     060loadhigh mdxvv [options]
 
@@ -58,8 +58,9 @@ M.Kamadaさんの 060loadhigh.x による 060turbo / PhantomX ハイメモリ上
 
 * `-u`
 
-060turbo / PhantomX のハイメモリをバッファとして使用します。060loadhigh.x を使用した場合でも指定が必要です。
+060turbo / TS-6BE16 のハイメモリをバッファとして使用します。060loadhigh.x を使用した場合でも指定が必要です。
 060loadhigh.x ではなく 060high.x でアロケートもハイメモリから行う指定で実行した場合は不要になります。
+TS-6BE16 のハイメモリの利用には TS16DRVp.X などのハイメモリドライバの導入が必要です。
 
 <br/>
 
@@ -315,6 +316,13 @@ MDXVVを終了します。
 ## Limitations / 制約事項
 
 日本語の含まれるファイル名は再生・音色表示は可能ですが、画面上正しく表示できません。曲タイトルについては表示可能です。
+
+---
+
+## 変更履歴
+
+- version 0.7.0 ... ハイメモリドライバの有無チェック ハイメモリの使い方見直し MXDRVの常駐チェック方式変更
+- version 0.6.1 ... 公開
 
 ---
 
