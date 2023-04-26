@@ -13,75 +13,25 @@ MDXセレクタ＆プレーヤー＆音色データビュワー＆音色デー�
 
 ## Install / インストール
 
-[MDXVV070.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV070.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
+[MDXVV080.ZIP](https://github.com/tantanGH/mdxvv/raw/main/MDXVV080.ZIP) をダウンロードして展開し、MDXVV.X をパスの通ったディレクトリにコピーします。
 
-PCM8とMXDRVの常駐が必要です。
-MXDRVバージョン2.06+16が常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
+MXDRVの常駐が必要です。MXDRVバージョン2.06+16相当が常駐していない場合はエラーメッセージが出てMDXVVは起動しません。
 
-PCM8およびMXDRVはいずれもX68000 LIBRARYより入手可能です。
+* [MXDRV.X](http://retropc.net/x68000/software/sound/mxdrv/)
 
-* http://retropc.net/x68000/software/sound/adpcm/pcm8/
-* http://retropc.net/x68000/software/sound/mxdrv/
+画面の描画にIOCSコールを多用しているので、HIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
 
-画面の描画にIOCSコールを多用しているので、YuNKさんのHIOCS.XなどIOCSを高速化するソフトウェアの導入を強く推奨します。
-
-* http://retropc.net/x68000/software/system/iocs/hiocs/
+* [HIOCS.X](http://retropc.net/x68000/software/system/iocs/hiocs/)
 
 ---
 
 ## How To Start / 起動方法
 
-    mdxvv [options] [mdx-directory-name]
+    mdxvv [mdx-directory-name]
 
 MDXファイルが格納されているフォルダを指定して起動します。
 指定が無い場合はカレントディレクトリが指定されたものとして扱います。
 MDXファイルそのものを指定しても構いません。その場合はそのMDXファイルがあるフォルダからの起動になります。
-
-M.Kamadaさんの 060loadhigh.x による 060turbo ハイメモリ上での実行にも対応しています。(060turbo.sys -xmの組み込みが必要)
-
-    060loadhigh mdxvv [options]
-
-* http://retropc.net/x68000/software/hardware/060turbo/060loadhigh/
-
-
-オプションとして以下の指定が可能です。
-
-<br/>
-
-* `-g`
-
-グラフィック画面の初期化を行いません。壁紙画像を維持したい場合などに。MDXVV自体はテキスト0,1プレーンのみを使用します。
-
-<img src='images/mdxvv6.png' width='576'/>
-
-<br/>
-
-* `-u`
-
-060turbo / TS-6BE16 のハイメモリをバッファとして使用します。060loadhigh.x を使用した場合でも指定が必要です。
-060loadhigh.x ではなく 060high.x でアロケートもハイメモリから行う指定で実行した場合は不要になります。
-TS-6BE16 のハイメモリの利用には TS16DRVp.X などのハイメモリドライバの導入が必要です。
-
-<br/>
-
-* `-f<n>`
-
-自動演奏モードの際、n (秒数) で指定された時間が経過すると曲をフェードアウトして次に進みます。
-
-<br/>
-
-* `-a`
-
-自動演奏モードをOFFにして起動します。起動後も `a` キーで ON/OFF を切り替えることができます。
-
-<br/>
-
-* `-w<n>`
-
-波形アニメーション速度を変更します。値が小さいほど速くなります。デフォルトは3。MPUの処理が追いつかず処理落ちする場合などは値を大きくしてみてください。
-
-
-波形アニメーション例：
 
 <img src='images/mdxvv5.gif'/>
 
@@ -300,19 +250,6 @@ MDXVVを終了します。
 
 ---
 
-## Background Image / 背景画像サポート
-
-スキャン対象となるディレクトリ内に、`MDXVV_BG.MAG` または `MDXVV_BG.PNG` という名前で画像ファイルが置かれていて、かつ環境変数でローダが設定されている場合は子プロセスでローダを呼び出して背景画像として表示します。
-
-    SET MDXVV_MAG=MAGH.X /O /X /E /L3 /V40
-    SET MDXVV_PNG=PNGEX.X -c -n -v40
-
-それぞれのローダと`COMMAND.X`にパスが通っている必要があります。
-
-<img src='images/mdxvv7.png'/>
-
----
-
 ## Limitations / 制約事項
 
 日本語の含まれるファイル名は再生・音色表示は可能ですが、画面上正しく表示できません。曲タイトルについては表示可能です。
@@ -321,6 +258,7 @@ MDXVVを終了します。
 
 ## 変更履歴
 
+- version 0.8.0 ... 低クロック機向け改善。ただしX68000Zではかなり厳しい
 - version 0.7.0 ... ハイメモリドライバの有無チェック ハイメモリの使い方見直し MXDRVの常駐チェック方式変更
 - version 0.6.1 ... 公開
 
@@ -335,25 +273,9 @@ MDXVVを終了します。
   * HAS060.X on run68mac Thanks to YuNKさん / M.Kamadaさん / GOROmanさん
   * HLK301.X on run68mac Thanks to SALTさん
   * SHARP XC 2.1 ライブラリ
-  * Microsoft Visual Studio Code
-  * Apple MacBook Air (2020, Apple Silicon, RAM8GB, SSD512GB)
 
 * エミュレータ
   * [XEiJ](https://stdkmd.net/xeij/) Thanks to M.Kamadaさん
-
-* 実機
-  * SHARP X68030
-  * 満開製作所 060turbo
-  * DELL P2314H モニタ
-
-* 書籍
-  * [Inside X68000, 桒野雅彦, ソフトバンク, 1992年](https://amzn.asia/d/6IA3urZ)
-  * [サウンドプログラミング入門, 青木直史, 技術評論社, 2013年](https://amzn.asia/d/5Jqxlwu)
-
-* その他
-  * [MMDSP](https://github.com/gaolay/MMDSP/)
-  * [ChatGPT](https://openai.com/blog/chatgpt/)
-
 
 
 <img src='images/mdxvv2.jpeg' width='806'/>
