@@ -271,7 +271,7 @@ MDXVVを終了します。
 開発にあたり以下のソフトウェア・ハードウェア・リソースを利用および参考にさせて頂きました。この場を借りてお礼申し上げます。
 
 * クロスコンパイル
-  * [elf2x68k](https://github.com/yunkya2/elf2x68k/)
+  * [elf2x68k + newlib](https://github.com/yunkya2/elf2x68k/) Thanks to yunkさん
 
 * エミュレータ
   * [XEiJ](https://stdkmd.net/xeij/) Thanks to M.Kamadaさん
